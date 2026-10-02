@@ -1,10 +1,4 @@
-// =====================================================
-// Envío de códigos por correo. Orden de prioridad:
-//   1) Brevo (API HTTPS, gratis 300/día)  -> PRODUCCIÓN en Render
-//      (el plan gratis de Render bloquea SMTP, por eso no se usa Gmail allí)
-//   2) Gmail SMTP (nodemailer)            -> desarrollo local
-//   3) Consola                            -> desarrollo sin configurar nada
-// =====================================================
+
 import nodemailer from "nodemailer";
 
 const subject = "Código para recuperar tu contraseña";
