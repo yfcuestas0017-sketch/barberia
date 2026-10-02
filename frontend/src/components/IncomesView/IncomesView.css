@@ -1,0 +1,132 @@
+.incomes-page { width: 100%; }
+
+.incomes-title h2 { margin: 0; font-size: 24px; color: var(--ink); }
+.incomes-title p { margin: 5px 0 18px; color: var(--muted); font-size: 13.5px; }
+
+.incomes-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  transition: opacity var(--dur) var(--ease-out);
+}
+.incomes-cards.is-loading { opacity: 0.55; }
+
+.incomes-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.incomes-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.incomes-icon.tone-success { background: var(--success-bg); color: var(--success-dark); }
+.incomes-icon.tone-danger  { background: var(--danger-bg); color: var(--danger-dark); }
+.incomes-icon.tone-gold    { background: var(--gold-bg); color: var(--gold-dark); }
+.incomes-icon.tone-info    { background: var(--info-bg); color: var(--info-dark); }
+
+.incomes-card span {
+  display: block;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.incomes-card strong { font-size: 20px; color: var(--ink); }
+
+.incomes-split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 14px 0 6px;
+}
+.incomes-split > div {
+  flex: 1 1 200px;
+  background: var(--gold-bg);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.incomes-split span { font-size: 13px; color: var(--ink-700); }
+.incomes-split strong { font-size: 16px; color: var(--gold-dark); }
+
+.incomes-section { margin-top: 26px; }
+.incomes-section h3 { margin: 0 0 12px; font-size: 16px; color: var(--ink); }
+
+.incomes-table-wrap {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+.incomes-table-wrap table { width: 100%; border-collapse: collapse; min-width: 520px; }
+.incomes-table-wrap th {
+  text-align: left;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.incomes-table-wrap td {
+  padding: 12px 16px;
+  font-size: 13.5px;
+  color: var(--ink-700);
+  border-bottom: 1px solid var(--border);
+}
+.incomes-table-wrap tbody tr:last-child td { border-bottom: none; }
+.incomes-table-wrap .money { font-weight: 700; color: var(--ink); white-space: nowrap; }
+.incomes-table-wrap tfoot td {
+  background: var(--surface);
+  font-weight: 700;
+  color: var(--ink);
+  border-top: 1px solid var(--border-strong);
+  border-bottom: none;
+}
+
+.incomes-empty,
+.incomes-loading {
+  background: #fff;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.incomes-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-dark);
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  font-size: 13.5px;
+}
+
+@media (max-width: 1000px) {
+  .incomes-cards { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .incomes-cards { grid-template-columns: 1fr; }
+}

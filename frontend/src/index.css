@@ -1,0 +1,438 @@
+/* =========================================================
+   BARBERÍA ELITE — Design system
+   Marca cálida (negro grafito + dorado) unificada en todo
+   el sitio público y los paneles internos.
+   ========================================================= */
+
+:root {
+  /* ---------- Neutrals (warm, not slate-gray) ---------- */
+  --bg: #ffffff;
+  --ink: #16151a;
+  --ink-800: #201e24;
+  --ink-700: #423f49;
+  --ink-soft: #55525c;
+  --ink-600: #605c66;
+  --muted: #8b8791;
+  --muted-400: #b3aeb6;
+
+  --black: #0e0d10;
+  --black-soft: #17161b;
+  --surface: #f6f5f3;
+  --surface-2: #efedea;
+  --app-bg: #f7f6f2;
+  --border: #e6e3de;
+  --border-strong: #d8d3cb;
+  --white: #ffffff;
+
+  /* ---------- Brand gold ---------- */
+  --gold: #c8972c;
+  --gold-light: #e3b94f;
+  --gold-dark: #a67c1f;
+  --gold-ink: #1a1305;
+  --gold-bg: rgba(200, 151, 44, 0.1);
+  --gold-border: rgba(200, 151, 44, 0.35);
+
+  /* ---------- Semantic ---------- */
+  --success: #1c8a4b;
+  --success-dark: #146238;
+  --success-bg: #e6f6ec;
+  --success-border: #b7e3c7;
+
+  --danger: #c8483d;
+  --danger-dark: #9c2f28;
+  --danger-bg: #fbe9e7;
+  --danger-border: #f0c4be;
+
+  --warning: #b8792a;
+  --warning-dark: #8a5a1e;
+  --warning-bg: #faf0dd;
+  --warning-border: #edd6a8;
+
+  --info: #3a5fb0;
+  --info-dark: #27407c;
+  --info-bg: #e9eefb;
+  --info-border: #c3d1ef;
+
+  /* ---------- Radius ---------- */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* ---------- Elevation ---------- */
+  --shadow-xs: 0 1px 2px rgba(14, 13, 16, 0.05);
+  --shadow-sm: 0 2px 8px rgba(14, 13, 16, 0.06);
+  --shadow: 0 12px 30px rgba(14, 13, 16, 0.1);
+  --shadow-lg: 0 24px 60px rgba(14, 13, 16, 0.18);
+  --shadow-gold: 0 10px 24px rgba(200, 151, 44, 0.32);
+  --ring: 0 0 0 4px var(--gold-border);
+  --ring-danger: 0 0 0 4px rgba(200, 72, 61, 0.22);
+
+  /* ---------- Motion (Emil Kowalski curves) ---------- */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-fast: 140ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
+
+  /* ---------- Typography ---------- */
+  --font-body: "Poppins", system-ui, "Segoe UI", sans-serif;
+  --font-display: "Playfair Display", Georgia, serif;
+
+  color-scheme: light;
+  color: var(--ink);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+h5, h6 {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+
+p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+/* ---------- Universal focus-visible ring ---------- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: var(--gold-light);
+  color: var(--gold-ink);
+}
+
+/* ---------- Scrollbar (webkit) ---------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-400);
+}
+
+.container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 18px;
+  }
+}
+
+/* =========================================================
+   Buttons — shared across landing / auth / app shells
+   ========================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out),
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+  color: var(--gold-ink);
+  box-shadow: var(--shadow-gold);
+}
+
+.btn-gold:hover {
+  box-shadow: 0 14px 30px rgba(200, 151, 44, 0.45);
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.btn-outline-light {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.btn-outline-light:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-dark {
+  background: var(--ink);
+  color: #fff;
+}
+
+.btn-dark:hover {
+  background: var(--black);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.btn-outline-dark {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--border-strong);
+}
+
+.btn-outline-dark:hover {
+  border-color: var(--ink);
+  background: var(--surface);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Small spinner used for button loading states */
+.btn-spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: currentColor;
+  animation: btn-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+}
+
+.section-eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: var(--gold);
+}
+
+/* =========================================================
+   Shared app-shell primitives (badges, cards, tables, forms)
+   reused across admin / barbero / cliente panels
+   ========================================================= */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  line-height: 1.4;
+}
+
+.badge-success { background: var(--success-bg); color: var(--success-dark); border-color: var(--success-border); }
+.badge-danger  { background: var(--danger-bg); color: var(--danger-dark); border-color: var(--danger-border); }
+.badge-warning { background: var(--warning-bg); color: var(--warning-dark); border-color: var(--warning-border); }
+.badge-info    { background: var(--info-bg); color: var(--info-dark); border-color: var(--info-border); }
+.badge-gold    { background: var(--gold-bg); color: var(--gold-dark); border-color: var(--gold-border); }
+
+/* =========================================================
+   Universal interactive-state layer
+   Every bespoke "*-button" / "*-btn" class across the admin,
+   barbero and cliente panels inherits real hover/active/focus
+   feedback from here, without needing a shared React component.
+   ========================================================= */
+button[class*="button" i]:not(:disabled),
+button[class*="btn" i]:not(:disabled),
+a[class*="button" i] {
+  transition: transform var(--dur-fast) var(--ease-out),
+    background var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out),
+    opacity var(--dur) var(--ease-out);
+}
+
+button[class*="button" i]:not(:disabled):active,
+button[class*="btn" i]:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Generic table polish shared by every data table in the app */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+tbody tr {
+  transition: background var(--dur) var(--ease-out);
+}
+
+
+
+/* ===== Acciones de admin: activar / desactivar / eliminar ===== */
+.toggle-button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.toggle-button.deactivate {
+  background: var(--warning-bg);
+  color: var(--warning-dark);
+}
+
+.toggle-button.activate {
+  background: var(--success-bg);
+  color: var(--success-dark);
+}
+
+.toggle-button:hover,
+.delete-button:hover,
+.edit-button:hover {
+  filter: brightness(0.96);
+}
+
+.delete-button.danger-solid {
+  background: var(--danger);
+  color: #fff;
+}
+
+.actions,
+.service-actions,
+.promotion-actions {
+  flex-wrap: wrap;
+}
+
+
+/* Etiqueta para citas / ingresos que vienen de una promoción */
+.promo-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--gold-bg);
+  border: 1px solid var(--gold-border);
+  color: var(--gold-dark);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}

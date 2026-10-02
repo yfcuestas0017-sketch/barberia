@@ -1,0 +1,283 @@
+.barber-profile {
+  width: 100%;
+}
+
+.profile-success {
+  padding: 12px 15px;
+  margin-bottom: 18px;
+
+  border-radius: var(--radius-sm);
+
+  background: var(--success-bg);
+  color: var(--success-dark);
+
+  font-size: 13px;
+}
+
+.profile-error {
+  margin-bottom: 18px;
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.profile-preview-card,
+.profile-form-card {
+  background: white;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  padding: 22px;
+}
+
+.profile-preview-card {
+  text-align: center;
+}
+
+.profile-photo {
+  width: 105px;
+  height: 105px;
+
+  margin: 5px auto 15px;
+
+  border-radius: 50%;
+
+  background: var(--ink);
+  color: white;
+
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.profile-photo img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.profile-preview-card h3 {
+  margin: 0;
+
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.profile-role {
+  display: inline-block;
+
+  margin-top: 6px;
+
+  color: var(--muted-400);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.5px;
+}
+
+.profile-specialty {
+  display: inline-block;
+
+  margin-top: 15px;
+
+  padding: 6px 10px;
+
+  border-radius: var(--radius-lg);
+
+  background: var(--surface-2);
+  color: var(--ink-700);
+
+  font-size: 11px;
+}
+
+.profile-description {
+  color: var(--muted);
+
+  font-size: 12px;
+  line-height: 1.6;
+
+  margin: 15px 0 0;
+}
+
+.profile-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  margin-top: 18px;
+
+  color: var(--success-dark);
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: var(--success);
+}
+
+.profile-card-header {
+  margin-bottom: 22px;
+
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid var(--surface-2);
+}
+
+.profile-card-header h3 {
+  margin: 0;
+
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.profile-card-header p {
+  margin: 5px 0 0;
+
+  color: var(--muted-400);
+  font-size: 12px;
+}
+
+.profile-form-grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 16px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-field label {
+  color: var(--ink-700);
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.profile-field input,
+.profile-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+
+  padding: 10px 11px;
+
+  background: white;
+  color: var(--ink-700);
+
+  outline: none;
+
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.profile-field textarea {
+  resize: vertical;
+}
+
+.profile-field input:focus,
+.profile-field textarea:focus {
+  border-color: var(--ink);
+}
+
+.profile-field input:disabled {
+  background: var(--surface);
+  color: var(--muted-400);
+  cursor: not-allowed;
+}
+
+.profile-field small {
+  color: var(--muted-400);
+  font-size: 10px;
+}
+
+.profile-full {
+  grid-column: 1 / -1;
+}
+
+.profile-form-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 22px;
+  padding-top: 18px;
+
+  border-top: 1px solid var(--surface-2);
+}
+
+.save-profile-button {
+  border: none;
+  border-radius: var(--radius-sm);
+
+  padding: 11px 18px;
+
+  background: var(--ink);
+  color: white;
+
+  cursor: pointer;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.save-profile-button:hover {
+  background: var(--ink-800);
+}
+
+.save-profile-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 850px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-preview-card {
+    max-width: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-full {
+    grid-column: auto;
+  }
+
+  .profile-form-actions {
+    justify-content: stretch;
+  }
+
+  .save-profile-button {
+    width: 100%;
+  }
+}

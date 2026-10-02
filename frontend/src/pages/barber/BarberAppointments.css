@@ -1,0 +1,307 @@
+.barber-appointments {
+  width: 100%;
+}
+
+.appointment-summary {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.appointment-summary-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 15px;
+}
+
+.appointment-summary-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.appointment-summary-card strong {
+  color: var(--ink);
+  font-size: 22px;
+}
+
+.appointment-filters {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  padding: 16px;
+
+  display: flex;
+  align-items: end;
+  gap: 15px;
+
+  margin-bottom: 20px;
+}
+
+.appointment-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.appointment-filter label {
+  color: var(--ink-700);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.appointment-filter input,
+.appointment-filter select {
+  min-width: 170px;
+
+  padding: 9px 11px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+
+  background: white;
+
+  color: var(--ink-700);
+  outline: none;
+}
+
+.appointment-filter input:focus,
+.appointment-filter select:focus {
+  border-color: var(--ink);
+}
+
+.clear-filters {
+  padding: 9px 13px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+
+  background: white;
+  color: var(--ink-700);
+
+  cursor: pointer;
+}
+
+.clear-filters:hover {
+  background: var(--surface-2);
+}
+
+.appointments-table-container {
+  width: 100%;
+
+  background: white;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  overflow-x: auto;
+}
+
+.appointments-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  min-width: 900px;
+}
+
+.appointments-table th {
+  background: var(--surface);
+
+  color: var(--muted);
+
+  font-size: 11px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  padding: 13px;
+
+  text-align: left;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.appointments-table td {
+  padding: 14px 13px;
+
+  color: var(--ink-700);
+  font-size: 13px;
+
+  border-bottom: 1px solid var(--surface-2);
+
+  vertical-align: middle;
+}
+
+.appointments-table tbody tr:hover {
+  background: var(--surface);
+}
+
+.appointments-table td small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted-400);
+  font-size: 11px;
+}
+
+.client-info {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.client-avatar {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  background: var(--ink);
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 700;
+  font-size: 13px;
+
+  flex-shrink: 0;
+}
+
+.client-info strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.client-info span {
+  display: block;
+  color: var(--muted-400);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.appointment-status {
+  display: inline-block;
+
+  padding: 5px 8px;
+
+  border-radius: var(--radius-lg);
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.appointment-status.pendiente {
+  background: var(--warning-bg);
+  color: var(--warning-dark);
+}
+
+.appointment-status.confirmada {
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.appointment-status.completada {
+  background: var(--success-bg);
+  color: var(--success-dark);
+}
+
+.appointment-status.cancelada {
+  background: var(--danger-bg);
+  color: var(--danger-dark);
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.appointment-actions button {
+  border: none;
+
+  padding: 7px 9px;
+
+  border-radius: var(--radius-sm);
+
+  cursor: pointer;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.confirm-button {
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.confirm-button:hover {
+  background: var(--info-border);
+}
+
+.complete-button {
+  background: var(--success-bg);
+  color: var(--success-dark);
+}
+
+.complete-button:hover {
+  background: var(--success-border);
+}
+
+.cancel-button {
+  background: var(--danger-bg);
+  color: var(--danger-dark);
+}
+
+.cancel-button:hover {
+  background: var(--danger-border);
+}
+
+.finished-label {
+  color: var(--success-dark);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.cancelled-label {
+  color: var(--danger-dark);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.empty-table {
+  text-align: center;
+  padding: 40px !important;
+  color: var(--muted-400) !important;
+}
+
+@media (max-width: 1000px) {
+  .appointment-summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .appointment-filters {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .appointment-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .appointment-filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .appointment-filter input,
+  .appointment-filter select {
+    width: 100%;
+  }
+}

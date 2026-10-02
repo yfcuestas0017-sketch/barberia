@@ -1,0 +1,274 @@
+.barbers-page {
+  width: 100%;
+}
+
+.page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.page-title h2 {
+  margin: 0;
+  font-size: 26px;
+  color: var(--ink);
+}
+
+.page-title p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.primary-button {
+  border: none;
+  background: var(--ink);
+  color: white;
+  padding: 11px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary-button:hover {
+  background: var(--ink-800);
+}
+
+.barbers-table-container {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+.barbers-table-container table {
+  min-width: 900px;
+}
+
+.barber-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-700);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.barber-name strong {
+  display: block;
+  color: var(--ink);
+}
+
+.barber-name small {
+  display: block;
+  color: var(--muted-400);
+  margin-top: 3px;
+}
+
+.status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: var(--radius-lg);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.active {
+  background: var(--success-bg);
+  color: var(--success-dark);
+}
+
+.status.inactive {
+  background: var(--danger-bg);
+  color: var(--danger-dark);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-button,
+.delete-button {
+  border: none;
+  padding: 7px 11px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.edit-button {
+  background: var(--surface-2);
+  color: var(--ink-700);
+}
+
+.delete-button {
+  background: var(--danger-bg);
+  color: var(--danger-dark);
+}
+
+.page-loading {
+  padding: 30px;
+  color: var(--muted);
+}
+
+.page-error {
+  margin-bottom: 20px;
+  background: var(--danger-bg);
+  color: var(--danger-dark);
+  padding: 12px 15px;
+  border-radius: var(--radius-sm);
+}
+
+.empty-row {
+  text-align: center;
+  padding: 40px;
+  color: var(--muted);
+}
+
+/* MODAL */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal {
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  background: white;
+  border-radius: var(--radius);
+  padding: 25px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 21px;
+  color: var(--ink);
+}
+
+.modal-header p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.close-button {
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-700);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--gold);
+  box-shadow: var(--ring);
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  margin-top: 25px;
+  padding-top: 20px;
+
+  border-top: 1px solid var(--border);
+}
+
+.cancel-button {
+  border: 1px solid var(--border-strong);
+  background: white;
+  color: var(--ink-700);
+
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+@media (max-width: 650px) {
+  .page-title {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.full {
+    grid-column: auto;
+  }
+}

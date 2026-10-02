@@ -1,0 +1,1314 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 16.4
+-- Dumped by pg_dump version 16.4
+
+-- Started on 2026-10-01 21:18:24
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 2 (class 3079 OID 46596)
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- TOC entry 5060 (class 0 OID 0)
+-- Dependencies: 2
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 223 (class 1259 OID 46436)
+-- Name: barberos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.barberos (
+    id_barbero bigint NOT NULL,
+    id_usuario bigint NOT NULL,
+    descripcion text,
+    especialidad character varying(150),
+    activo boolean DEFAULT true NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.barberos OWNER TO postgres;
+
+--
+-- TOC entry 222 (class 1259 OID 46435)
+-- Name: barberos_id_barbero_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.barberos_id_barbero_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.barberos_id_barbero_seq OWNER TO postgres;
+
+--
+-- TOC entry 5061 (class 0 OID 0)
+-- Dependencies: 222
+-- Name: barberos_id_barbero_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.barberos_id_barbero_seq OWNED BY public.barberos.id_barbero;
+
+
+--
+-- TOC entry 231 (class 1259 OID 46498)
+-- Name: citas; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.citas (
+    id_cita bigint NOT NULL,
+    id_cliente bigint NOT NULL,
+    id_barbero bigint NOT NULL,
+    id_servicio bigint,
+    fecha date NOT NULL,
+    hora_inicio time without time zone NOT NULL,
+    hora_fin time without time zone NOT NULL,
+    precio numeric(12,2) NOT NULL,
+    estado character varying(20) DEFAULT 'PENDIENTE'::character varying NOT NULL,
+    observacion text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    id_promocion bigint,
+    CONSTRAINT chk_cita_estado CHECK (((estado)::text = ANY ((ARRAY['PENDIENTE'::character varying, 'CONFIRMADA'::character varying, 'COMPLETADA'::character varying, 'CANCELADA'::character varying])::text[]))),
+    CONSTRAINT chk_cita_horas CHECK ((hora_fin > hora_inicio)),
+    CONSTRAINT chk_cita_precio CHECK ((precio >= (0)::numeric)),
+    CONSTRAINT citas_servicio_o_promocion_chk CHECK (((id_servicio IS NOT NULL) OR (id_promocion IS NOT NULL)))
+);
+
+
+ALTER TABLE public.citas OWNER TO postgres;
+
+--
+-- TOC entry 230 (class 1259 OID 46497)
+-- Name: citas_id_cita_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.citas_id_cita_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.citas_id_cita_seq OWNER TO postgres;
+
+--
+-- TOC entry 5062 (class 0 OID 0)
+-- Dependencies: 230
+-- Name: citas_id_cita_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.citas_id_cita_seq OWNED BY public.citas.id_cita;
+
+
+--
+-- TOC entry 237 (class 1259 OID 46654)
+-- Name: codigos_recuperacion; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.codigos_recuperacion (
+    id_codigo bigint NOT NULL,
+    id_usuario bigint NOT NULL,
+    codigo_hash text NOT NULL,
+    expira_en timestamp with time zone NOT NULL,
+    intentos integer DEFAULT 0 NOT NULL,
+    verificado boolean DEFAULT false NOT NULL,
+    usado boolean DEFAULT false NOT NULL,
+    creado_en timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.codigos_recuperacion OWNER TO postgres;
+
+--
+-- TOC entry 236 (class 1259 OID 46653)
+-- Name: codigos_recuperacion_id_codigo_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.codigos_recuperacion_id_codigo_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.codigos_recuperacion_id_codigo_seq OWNER TO postgres;
+
+--
+-- TOC entry 5063 (class 0 OID 0)
+-- Dependencies: 236
+-- Name: codigos_recuperacion_id_codigo_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.codigos_recuperacion_id_codigo_seq OWNED BY public.codigos_recuperacion.id_codigo;
+
+
+--
+-- TOC entry 229 (class 1259 OID 46482)
+-- Name: horarios_barbero; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.horarios_barbero (
+    id_horario bigint NOT NULL,
+    id_barbero bigint NOT NULL,
+    fecha date NOT NULL,
+    hora_inicio time without time zone NOT NULL,
+    hora_fin time without time zone NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    duracion_corte integer,
+    CONSTRAINT chk_horario_horas CHECK ((hora_fin > hora_inicio)),
+    CONSTRAINT horarios_barbero_duracion_corte_chk CHECK (((duracion_corte IS NULL) OR ((duracion_corte >= 5) AND (duracion_corte <= 240))))
+);
+
+
+ALTER TABLE public.horarios_barbero OWNER TO postgres;
+
+--
+-- TOC entry 228 (class 1259 OID 46481)
+-- Name: horarios_barbero_id_horario_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.horarios_barbero_id_horario_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.horarios_barbero_id_horario_seq OWNER TO postgres;
+
+--
+-- TOC entry 5064 (class 0 OID 0)
+-- Dependencies: 228
+-- Name: horarios_barbero_id_horario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.horarios_barbero_id_horario_seq OWNED BY public.horarios_barbero.id_horario;
+
+
+--
+-- TOC entry 235 (class 1259 OID 46556)
+-- Name: movimientos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.movimientos (
+    id_movimiento bigint NOT NULL,
+    tipo character varying(10) NOT NULL,
+    concepto character varying(200) NOT NULL,
+    monto numeric(12,2) NOT NULL,
+    fecha date DEFAULT CURRENT_DATE NOT NULL,
+    id_usuario bigint,
+    id_cita bigint,
+    observacion text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT chk_movimiento_monto CHECK ((monto > (0)::numeric)),
+    CONSTRAINT chk_movimiento_tipo CHECK (((tipo)::text = ANY ((ARRAY['INGRESO'::character varying, 'EGRESO'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.movimientos OWNER TO postgres;
+
+--
+-- TOC entry 234 (class 1259 OID 46555)
+-- Name: movimientos_id_movimiento_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.movimientos_id_movimiento_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.movimientos_id_movimiento_seq OWNER TO postgres;
+
+--
+-- TOC entry 5065 (class 0 OID 0)
+-- Dependencies: 234
+-- Name: movimientos_id_movimiento_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.movimientos_id_movimiento_seq OWNED BY public.movimientos.id_movimiento;
+
+
+--
+-- TOC entry 227 (class 1259 OID 46468)
+-- Name: promociones; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.promociones (
+    id_promocion bigint NOT NULL,
+    nombre character varying(150) NOT NULL,
+    descripcion text,
+    precio numeric(12,2) NOT NULL,
+    foto text,
+    fecha_inicio date NOT NULL,
+    fecha_fin date NOT NULL,
+    activo boolean DEFAULT true NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    duracion_minutos integer DEFAULT 30 NOT NULL,
+    CONSTRAINT chk_promocion_fechas CHECK ((fecha_fin >= fecha_inicio)),
+    CONSTRAINT chk_promocion_precio CHECK ((precio >= (0)::numeric))
+);
+
+
+ALTER TABLE public.promociones OWNER TO postgres;
+
+--
+-- TOC entry 226 (class 1259 OID 46467)
+-- Name: promociones_id_promocion_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.promociones_id_promocion_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.promociones_id_promocion_seq OWNER TO postgres;
+
+--
+-- TOC entry 5066 (class 0 OID 0)
+-- Dependencies: 226
+-- Name: promociones_id_promocion_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.promociones_id_promocion_seq OWNED BY public.promociones.id_promocion;
+
+
+--
+-- TOC entry 233 (class 1259 OID 46528)
+-- Name: resenas; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.resenas (
+    id_resena bigint NOT NULL,
+    id_cita bigint NOT NULL,
+    id_cliente bigint NOT NULL,
+    id_barbero bigint NOT NULL,
+    estrellas integer NOT NULL,
+    comentario text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT chk_resena_estrellas CHECK (((estrellas >= 1) AND (estrellas <= 5)))
+);
+
+
+ALTER TABLE public.resenas OWNER TO postgres;
+
+--
+-- TOC entry 232 (class 1259 OID 46527)
+-- Name: resenas_id_resena_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.resenas_id_resena_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.resenas_id_resena_seq OWNER TO postgres;
+
+--
+-- TOC entry 5067 (class 0 OID 0)
+-- Dependencies: 232
+-- Name: resenas_id_resena_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.resenas_id_resena_seq OWNED BY public.resenas.id_resena;
+
+
+--
+-- TOC entry 219 (class 1259 OID 46407)
+-- Name: roles; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.roles (
+    id_rol integer NOT NULL,
+    nombre character varying(30) NOT NULL,
+    descripcion character varying(255)
+);
+
+
+ALTER TABLE public.roles OWNER TO postgres;
+
+--
+-- TOC entry 218 (class 1259 OID 46406)
+-- Name: roles_id_rol_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.roles_id_rol_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.roles_id_rol_seq OWNER TO postgres;
+
+--
+-- TOC entry 5068 (class 0 OID 0)
+-- Dependencies: 218
+-- Name: roles_id_rol_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.roles_id_rol_seq OWNED BY public.roles.id_rol;
+
+
+--
+-- TOC entry 225 (class 1259 OID 46454)
+-- Name: servicios; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.servicios (
+    id_servicio bigint NOT NULL,
+    nombre character varying(150) NOT NULL,
+    descripcion text,
+    precio numeric(12,2) NOT NULL,
+    duracion_minutos integer NOT NULL,
+    foto text,
+    activo boolean DEFAULT true NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT chk_servicio_duracion CHECK ((duracion_minutos > 0)),
+    CONSTRAINT chk_servicio_precio CHECK ((precio >= (0)::numeric))
+);
+
+
+ALTER TABLE public.servicios OWNER TO postgres;
+
+--
+-- TOC entry 224 (class 1259 OID 46453)
+-- Name: servicios_id_servicio_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.servicios_id_servicio_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.servicios_id_servicio_seq OWNER TO postgres;
+
+--
+-- TOC entry 5069 (class 0 OID 0)
+-- Dependencies: 224
+-- Name: servicios_id_servicio_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.servicios_id_servicio_seq OWNED BY public.servicios.id_servicio;
+
+
+--
+-- TOC entry 221 (class 1259 OID 46416)
+-- Name: usuario_roles; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.usuario_roles (
+    id_usuario_rol bigint NOT NULL,
+    id_usuario bigint NOT NULL,
+    id_rol integer NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.usuario_roles OWNER TO postgres;
+
+--
+-- TOC entry 220 (class 1259 OID 46415)
+-- Name: usuario_roles_id_usuario_rol_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.usuario_roles_id_usuario_rol_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.usuario_roles_id_usuario_rol_seq OWNER TO postgres;
+
+--
+-- TOC entry 5070 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: usuario_roles_id_usuario_rol_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.usuario_roles_id_usuario_rol_seq OWNED BY public.usuario_roles.id_usuario_rol;
+
+
+--
+-- TOC entry 217 (class 1259 OID 46393)
+-- Name: usuarios; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.usuarios (
+    id_usuario bigint NOT NULL,
+    nombre character varying(100) NOT NULL,
+    apellido character varying(100) NOT NULL,
+    email character varying(150) NOT NULL,
+    telefono character varying(20),
+    password character varying(255) NOT NULL,
+    foto text,
+    activo boolean DEFAULT true NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.usuarios OWNER TO postgres;
+
+--
+-- TOC entry 216 (class 1259 OID 46392)
+-- Name: usuarios_id_usuario_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.usuarios_id_usuario_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.usuarios_id_usuario_seq OWNER TO postgres;
+
+--
+-- TOC entry 5071 (class 0 OID 0)
+-- Dependencies: 216
+-- Name: usuarios_id_usuario_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.usuarios_id_usuario_seq OWNED BY public.usuarios.id_usuario;
+
+
+--
+-- TOC entry 4782 (class 2604 OID 46439)
+-- Name: barberos id_barbero; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.barberos ALTER COLUMN id_barbero SET DEFAULT nextval('public.barberos_id_barbero_seq'::regclass);
+
+
+--
+-- TOC entry 4796 (class 2604 OID 46501)
+-- Name: citas id_cita; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.citas ALTER COLUMN id_cita SET DEFAULT nextval('public.citas_id_cita_seq'::regclass);
+
+
+--
+-- TOC entry 4805 (class 2604 OID 46657)
+-- Name: codigos_recuperacion id_codigo; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.codigos_recuperacion ALTER COLUMN id_codigo SET DEFAULT nextval('public.codigos_recuperacion_id_codigo_seq'::regclass);
+
+
+--
+-- TOC entry 4794 (class 2604 OID 46485)
+-- Name: horarios_barbero id_horario; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.horarios_barbero ALTER COLUMN id_horario SET DEFAULT nextval('public.horarios_barbero_id_horario_seq'::regclass);
+
+
+--
+-- TOC entry 4802 (class 2604 OID 46559)
+-- Name: movimientos id_movimiento; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.movimientos ALTER COLUMN id_movimiento SET DEFAULT nextval('public.movimientos_id_movimiento_seq'::regclass);
+
+
+--
+-- TOC entry 4789 (class 2604 OID 46471)
+-- Name: promociones id_promocion; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.promociones ALTER COLUMN id_promocion SET DEFAULT nextval('public.promociones_id_promocion_seq'::regclass);
+
+
+--
+-- TOC entry 4800 (class 2604 OID 46531)
+-- Name: resenas id_resena; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.resenas ALTER COLUMN id_resena SET DEFAULT nextval('public.resenas_id_resena_seq'::regclass);
+
+
+--
+-- TOC entry 4779 (class 2604 OID 46410)
+-- Name: roles id_rol; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.roles ALTER COLUMN id_rol SET DEFAULT nextval('public.roles_id_rol_seq'::regclass);
+
+
+--
+-- TOC entry 4785 (class 2604 OID 46457)
+-- Name: servicios id_servicio; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.servicios ALTER COLUMN id_servicio SET DEFAULT nextval('public.servicios_id_servicio_seq'::regclass);
+
+
+--
+-- TOC entry 4780 (class 2604 OID 46419)
+-- Name: usuario_roles id_usuario_rol; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuario_roles ALTER COLUMN id_usuario_rol SET DEFAULT nextval('public.usuario_roles_id_usuario_rol_seq'::regclass);
+
+
+--
+-- TOC entry 4775 (class 2604 OID 46396)
+-- Name: usuarios id_usuario; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuarios ALTER COLUMN id_usuario SET DEFAULT nextval('public.usuarios_id_usuario_seq'::regclass);
+
+
+--
+-- TOC entry 5040 (class 0 OID 46436)
+-- Dependencies: 223
+-- Data for Name: barberos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.barberos (id_barbero, id_usuario, descripcion, especialidad, activo, created_at) FROM stdin;
+2	5	\N	fade	t	2026-09-21 23:51:50.550489
+\.
+
+
+--
+-- TOC entry 5048 (class 0 OID 46498)
+-- Dependencies: 231
+-- Data for Name: citas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.citas (id_cita, id_cliente, id_barbero, id_servicio, fecha, hora_inicio, hora_fin, precio, estado, observacion, created_at, updated_at, id_promocion) FROM stdin;
+1	6	2	2	2026-09-23	11:00:00	11:45:00	20000.00	COMPLETADA	\N	2026-09-22 00:23:54.582552	2026-09-24 23:08:46.598392	\N
+2	7	2	1	2026-09-23	10:15:00	10:45:00	15000.00	COMPLETADA	\N	2026-09-22 00:26:50.324233	2026-09-24 23:09:00.805711	\N
+4	7	2	4	2026-09-25	20:00:00	21:00:00	28000.00	COMPLETADA	\N	2026-09-24 23:46:24.280783	2026-09-24 23:47:06.527772	\N
+3	7	2	4	2026-09-25	10:00:00	11:00:00	28000.00	COMPLETADA	\N	2026-09-24 23:46:19.073606	2026-09-24 23:47:07.902967	\N
+5	7	2	\N	2026-09-30	09:50:00	10:20:00	22000.00	COMPLETADA	\N	2026-09-29 01:21:25.752919	2026-09-29 01:21:45.58909	2
+6	7	2	5	2026-10-03	09:35:00	10:10:00	20000.00	CONFIRMADA	\N	2026-10-01 20:08:31.629785	2026-10-01 20:08:31.629785	\N
+\.
+
+
+--
+-- TOC entry 5054 (class 0 OID 46654)
+-- Dependencies: 237
+-- Data for Name: codigos_recuperacion; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.codigos_recuperacion (id_codigo, id_usuario, codigo_hash, expira_en, intentos, verificado, usado, creado_en) FROM stdin;
+1	5	$2b$08$/pF0F.k.qjZmq7P13Tv44.XO8EZx3KIzfP8kVpwL41uRpTL5dD6.e	2026-10-01 21:00:26.029162-05	0	f	t	2026-10-01 20:50:26.029162-05
+2	5	$2b$08$Joffv3szzTeEYeR0jmKFC.9pFUJzn2C/kkXJyozHkPnQQeuA.V4dy	2026-10-01 21:01:44.125252-05	0	f	f	2026-10-01 20:51:44.125252-05
+3	8	$2b$08$hIMX1n65KwJCeUXW3OsfRePE/x52C7.68Yn1TZslIH5BjVHzEHNWC	2026-10-01 21:10:02.264205-05	0	t	t	2026-10-01 21:00:02.264205-05
+4	8	$2b$08$q4PmsdOQud/pADZdHqIoIu5Qu8Lhlh51/y/41tLufZJLwpazx0sjm	2026-10-01 21:16:19.840926-05	0	t	t	2026-10-01 21:06:19.840926-05
+\.
+
+
+--
+-- TOC entry 5046 (class 0 OID 46482)
+-- Dependencies: 229
+-- Data for Name: horarios_barbero; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.horarios_barbero (id_horario, id_barbero, fecha, hora_inicio, hora_fin, created_at, duracion_corte) FROM stdin;
+6	2	2026-09-25	08:00:00	22:43:00	2026-09-24 23:43:33.915268	\N
+7	2	2026-09-30	07:20:00	19:20:00	2026-09-29 01:20:41.429091	\N
+8	2	2026-10-01	08:44:00	20:44:00	2026-10-01 19:44:29.470771	\N
+9	2	2026-10-02	09:00:00	18:00:00	2026-10-01 19:55:20.673635	35
+10	2	2026-10-03	09:00:00	11:50:00	2026-10-01 20:00:43.833467	35
+11	2	2026-10-03	14:00:00	18:00:00	2026-10-01 20:00:43.840215	35
+\.
+
+
+--
+-- TOC entry 5052 (class 0 OID 46556)
+-- Dependencies: 235
+-- Data for Name: movimientos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.movimientos (id_movimiento, tipo, concepto, monto, fecha, id_usuario, id_cita, observacion, created_at) FROM stdin;
+1	INGRESO	Servicio: Corte + Barba	28000.00	2026-09-25	5	4	Generado automáticamente al completar la cita	2026-09-24 23:47:06.527772
+2	INGRESO	Servicio: Corte + Barba	28000.00	2026-09-25	5	3	Generado automáticamente al completar la cita	2026-09-24 23:47:07.902967
+3	EGRESO	maquina de peluquear	5001.00	2026-09-29	4	\N	nda	2026-09-29 00:27:50.163039
+4	INGRESO	Servicio: Corte clásico	15000.00	2026-09-23	5	2	Registrado automáticamente (cita completada)	2026-09-29 01:08:32.032398
+5	INGRESO	Servicio: Corte Fade	20000.00	2026-09-23	5	1	Registrado automáticamente (cita completada)	2026-09-29 01:08:32.032398
+6	INGRESO	Promoción: corte + pestaña	22000.00	2026-09-30	5	5	Generado automáticamente al completar la cita	2026-09-29 01:21:45.58909
+\.
+
+
+--
+-- TOC entry 5044 (class 0 OID 46468)
+-- Dependencies: 227
+-- Data for Name: promociones; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.promociones (id_promocion, nombre, descripcion, precio, foto, fecha_inicio, fecha_fin, activo, created_at, updated_at, duracion_minutos) FROM stdin;
+3	prueba+1	nada	20000.00	https://preview.redd.it/why-people-like-avatar-v0-np9yl8j9xsre1.jpeg?width=640&crop=smart&auto=webp&s=309930aab2d4a8a5417088c37332afe7efa11584	2026-10-01	2026-10-17	t	2026-09-24 22:10:34.358283	2026-09-24 22:33:38.897668	30
+2	corte + pestaña	\N	22000.00	http://localhost:5000/uploads/1790307626149-311289.jpeg	2026-09-22	2026-10-10	t	2026-09-21 23:54:08.252756	2026-09-24 22:40:27.457462	30
+5	Combo Corte + Barba	\N	10000.00	http://localhost:5000/uploads/1790661142508-533612.jpg	2026-10-01	2026-10-05	t	2026-09-29 00:52:42.042199	2026-09-29 00:52:42.042199	60
+4	prueba uno	\N	23000.00	http://localhost:5000/uploads/1790661107868-225571.jpg	2026-09-30	2026-10-09	t	2026-09-29 00:51:56.89477	2026-09-29 00:51:56.89477	60
+6	prueba	no te lo pierdas	50000.00	http://localhost:5000/uploads/1790662230683-660226.jpg	2026-10-01	2026-10-10	t	2026-09-29 01:10:39.635478	2026-09-29 01:10:39.635478	45
+\.
+
+
+--
+-- TOC entry 5050 (class 0 OID 46528)
+-- Dependencies: 233
+-- Data for Name: resenas; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.resenas (id_resena, id_cita, id_cliente, id_barbero, estrellas, comentario, created_at) FROM stdin;
+1	4	7	2	4	tiene buen manejo de maquinas y excelente atencion	2026-09-24 23:48:10.057932
+2	3	7	2	5	excelente	2026-09-24 23:50:34.472589
+3	2	7	2	5	\N	2026-09-29 00:42:34.446661
+\.
+
+
+--
+-- TOC entry 5036 (class 0 OID 46407)
+-- Dependencies: 219
+-- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.roles (id_rol, nombre, descripcion) FROM stdin;
+1	ADMIN	Administrador del sistema
+2	BARBERO	Barbero de la barbería
+3	CLIENTE	Cliente de la barbería
+\.
+
+
+--
+-- TOC entry 5042 (class 0 OID 46454)
+-- Dependencies: 225
+-- Data for Name: servicios; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.servicios (id_servicio, nombre, descripcion, precio, duracion_minutos, foto, activo, created_at, updated_at) FROM stdin;
+1	Corte clásico	Corte tradicional de cabello.	15000.00	30	\N	t	2026-09-21 20:33:02.392789	2026-09-21 20:33:02.392789
+4	Corte + Barba	Corte de cabello más arreglo de barba.	28000.00	60	http://localhost:5000/uploads/1790307769969-309139.jpg	t	2026-09-21 20:33:02.392789	2026-09-24 22:42:51.574249
+3	Barba	Perfilado y arreglo de barba.	10000.00	20	http://localhost:5000/uploads/1790307777623-332133.jpg	t	2026-09-21 20:33:02.392789	2026-09-24 22:43:01.842018
+2	Corte Fade	Corte degradado moderno.	20000.00	45	http://localhost:5000/uploads/1790307789153-149024.jpg	t	2026-09-21 20:33:02.392789	2026-09-24 22:43:09.872321
+5	pestañas		20000.00	25	http://localhost:5000/uploads/1790308253758-984925.jpg	t	2026-09-21 23:53:00.32623	2026-09-24 22:50:54.987994
+\.
+
+
+--
+-- TOC entry 5038 (class 0 OID 46416)
+-- Dependencies: 221
+-- Data for Name: usuario_roles; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.usuario_roles (id_usuario_rol, id_usuario, id_rol, created_at) FROM stdin;
+1	1	1	2026-09-21 20:33:02.392789
+3	3	3	2026-09-21 20:33:02.392789
+4	4	1	2026-09-21 22:27:08.407951
+5	5	2	2026-09-21 23:51:50.550489
+6	6	3	2026-09-22 00:13:16.584818
+7	7	3	2026-09-22 00:25:40.945556
+8	8	3	2026-10-01 20:59:45.476021
+\.
+
+
+--
+-- TOC entry 5034 (class 0 OID 46393)
+-- Dependencies: 217
+-- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.usuarios (id_usuario, nombre, apellido, email, telefono, password, foto, activo, created_at, updated_at) FROM stdin;
+1	Administrador	Principal	admin@barberia.com	3000000000	CAMBIAR_POR_HASH_BCRYPT	\N	t	2026-09-21 20:33:02.392789	2026-09-21 20:33:02.392789
+3	Juan	Gómez	juan@gmail.com	3002222222	CAMBIAR_POR_HASH_BCRYPT	\N	t	2026-09-21 20:33:02.392789	2026-09-21 20:33:02.392789
+7	cliente	dos	cliente123@gmail.com	125345123	$2b$10$Ol8VEdTUweuc5qDe5OZKIeBRgw2teJz69OY8O2Gazg56mz7fKG.fi	https://preview.redd.it/why-people-like-avatar-v0-np9yl8j9xsre1.jpeg?width=640&crop=smart&auto=webp&s=309930aab2d4a8a5417088c37332afe7efa11584	t	2026-09-22 00:25:40.942768	2026-09-22 20:59:37.737924
+5	prueba	uno	yfcuestas.0017@unicesmag.edu.co	3175021974	$2b$10$mKN3iZizXD1ys1M88zNEnOsi1H/HICTGzAn.89c7/NwNgyl5UyVGO	http://localhost:5000/uploads/1790308815971-130626.jpg	t	2026-09-21 23:51:50.550489	2026-09-24 23:00:17.280774
+4	Jimy	coral	admin123@gmail.com	3002222222	$2a$06$ikEOqnnb3j2D3HSqkkba6u4slDmaQwzDdhioY/w29FwPta8rqwFiy	http://localhost:5000/uploads/1790310774632-548305.png	t	2026-09-21 22:26:17.37041	2026-09-24 23:32:59.356875
+6	cliente	uno	yy@gmail.com	3175021974	$2b$10$q93FuJ6P9BdbFKqrQn/UA.yBc3uDBn9WJlD00kDUsyJ/UJmSw9Vm.	\N	t	2026-09-22 00:13:16.566769	2026-09-22 00:13:16.566769
+8	yimmy	coral	yimmycuestas41@gmail.com	3175021974	$2b$10$2L/9fZScpcdIHgMcuCA4p.QK5QeCWmcejw1LWsqv55upYJacOl6/y	\N	t	2026-10-01 20:59:45.468582	2026-10-01 20:59:45.468582
+\.
+
+
+--
+-- TOC entry 5072 (class 0 OID 0)
+-- Dependencies: 222
+-- Name: barberos_id_barbero_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.barberos_id_barbero_seq', 2, true);
+
+
+--
+-- TOC entry 5073 (class 0 OID 0)
+-- Dependencies: 230
+-- Name: citas_id_cita_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.citas_id_cita_seq', 6, true);
+
+
+--
+-- TOC entry 5074 (class 0 OID 0)
+-- Dependencies: 236
+-- Name: codigos_recuperacion_id_codigo_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.codigos_recuperacion_id_codigo_seq', 4, true);
+
+
+--
+-- TOC entry 5075 (class 0 OID 0)
+-- Dependencies: 228
+-- Name: horarios_barbero_id_horario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.horarios_barbero_id_horario_seq', 11, true);
+
+
+--
+-- TOC entry 5076 (class 0 OID 0)
+-- Dependencies: 234
+-- Name: movimientos_id_movimiento_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.movimientos_id_movimiento_seq', 6, true);
+
+
+--
+-- TOC entry 5077 (class 0 OID 0)
+-- Dependencies: 226
+-- Name: promociones_id_promocion_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.promociones_id_promocion_seq', 6, true);
+
+
+--
+-- TOC entry 5078 (class 0 OID 0)
+-- Dependencies: 232
+-- Name: resenas_id_resena_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.resenas_id_resena_seq', 3, true);
+
+
+--
+-- TOC entry 5079 (class 0 OID 0)
+-- Dependencies: 218
+-- Name: roles_id_rol_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.roles_id_rol_seq', 3, true);
+
+
+--
+-- TOC entry 5080 (class 0 OID 0)
+-- Dependencies: 224
+-- Name: servicios_id_servicio_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.servicios_id_servicio_seq', 5, true);
+
+
+--
+-- TOC entry 5081 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: usuario_roles_id_usuario_rol_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.usuario_roles_id_usuario_rol_seq', 8, true);
+
+
+--
+-- TOC entry 5082 (class 0 OID 0)
+-- Dependencies: 216
+-- Name: usuarios_id_usuario_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.usuarios_id_usuario_seq', 8, true);
+
+
+--
+-- TOC entry 4839 (class 2606 OID 46447)
+-- Name: barberos barberos_id_usuario_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.barberos
+    ADD CONSTRAINT barberos_id_usuario_key UNIQUE (id_usuario);
+
+
+--
+-- TOC entry 4841 (class 2606 OID 46445)
+-- Name: barberos barberos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.barberos
+    ADD CONSTRAINT barberos_pkey PRIMARY KEY (id_barbero);
+
+
+--
+-- TOC entry 4856 (class 2606 OID 46511)
+-- Name: citas citas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.citas
+    ADD CONSTRAINT citas_pkey PRIMARY KEY (id_cita);
+
+
+--
+-- TOC entry 4874 (class 2606 OID 46665)
+-- Name: codigos_recuperacion codigos_recuperacion_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.codigos_recuperacion
+    ADD CONSTRAINT codigos_recuperacion_pkey PRIMARY KEY (id_codigo);
+
+
+--
+-- TOC entry 4851 (class 2606 OID 46489)
+-- Name: horarios_barbero horarios_barbero_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.horarios_barbero
+    ADD CONSTRAINT horarios_barbero_pkey PRIMARY KEY (id_horario);
+
+
+--
+-- TOC entry 4872 (class 2606 OID 46567)
+-- Name: movimientos movimientos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.movimientos
+    ADD CONSTRAINT movimientos_pkey PRIMARY KEY (id_movimiento);
+
+
+--
+-- TOC entry 4849 (class 2606 OID 46480)
+-- Name: promociones promociones_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.promociones
+    ADD CONSTRAINT promociones_pkey PRIMARY KEY (id_promocion);
+
+
+--
+-- TOC entry 4865 (class 2606 OID 46539)
+-- Name: resenas resenas_id_cita_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.resenas
+    ADD CONSTRAINT resenas_id_cita_key UNIQUE (id_cita);
+
+
+--
+-- TOC entry 4867 (class 2606 OID 46537)
+-- Name: resenas resenas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.resenas
+    ADD CONSTRAINT resenas_pkey PRIMARY KEY (id_resena);
+
+
+--
+-- TOC entry 4829 (class 2606 OID 46414)
+-- Name: roles roles_nombre_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.roles
+    ADD CONSTRAINT roles_nombre_key UNIQUE (nombre);
+
+
+--
+-- TOC entry 4831 (class 2606 OID 46412)
+-- Name: roles roles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.roles
+    ADD CONSTRAINT roles_pkey PRIMARY KEY (id_rol);
+
+
+--
+-- TOC entry 4846 (class 2606 OID 46466)
+-- Name: servicios servicios_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.servicios
+    ADD CONSTRAINT servicios_pkey PRIMARY KEY (id_servicio);
+
+
+--
+-- TOC entry 4854 (class 2606 OID 46491)
+-- Name: horarios_barbero uq_horario_barbero; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.horarios_barbero
+    ADD CONSTRAINT uq_horario_barbero UNIQUE (id_barbero, fecha, hora_inicio, hora_fin);
+
+
+--
+-- TOC entry 4835 (class 2606 OID 46424)
+-- Name: usuario_roles uq_usuario_rol; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuario_roles
+    ADD CONSTRAINT uq_usuario_rol UNIQUE (id_usuario, id_rol);
+
+
+--
+-- TOC entry 4837 (class 2606 OID 46422)
+-- Name: usuario_roles usuario_roles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuario_roles
+    ADD CONSTRAINT usuario_roles_pkey PRIMARY KEY (id_usuario_rol);
+
+
+--
+-- TOC entry 4825 (class 2606 OID 46405)
+-- Name: usuarios usuarios_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuarios
+    ADD CONSTRAINT usuarios_email_key UNIQUE (email);
+
+
+--
+-- TOC entry 4827 (class 2606 OID 46403)
+-- Name: usuarios usuarios_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuarios
+    ADD CONSTRAINT usuarios_pkey PRIMARY KEY (id_usuario);
+
+
+--
+-- TOC entry 4842 (class 1259 OID 46582)
+-- Name: idx_barberos_activo; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_barberos_activo ON public.barberos USING btree (activo);
+
+
+--
+-- TOC entry 4843 (class 1259 OID 46581)
+-- Name: idx_barberos_usuario; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_barberos_usuario ON public.barberos USING btree (id_usuario);
+
+
+--
+-- TOC entry 4857 (class 1259 OID 46587)
+-- Name: idx_citas_barbero; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_citas_barbero ON public.citas USING btree (id_barbero);
+
+
+--
+-- TOC entry 4858 (class 1259 OID 46589)
+-- Name: idx_citas_barbero_fecha; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_citas_barbero_fecha ON public.citas USING btree (id_barbero, fecha);
+
+
+--
+-- TOC entry 4859 (class 1259 OID 46586)
+-- Name: idx_citas_cliente; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_citas_cliente ON public.citas USING btree (id_cliente);
+
+
+--
+-- TOC entry 4860 (class 1259 OID 46590)
+-- Name: idx_citas_estado; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_citas_estado ON public.citas USING btree (estado);
+
+
+--
+-- TOC entry 4861 (class 1259 OID 46588)
+-- Name: idx_citas_fecha; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_citas_fecha ON public.citas USING btree (fecha);
+
+
+--
+-- TOC entry 4862 (class 1259 OID 46644)
+-- Name: idx_citas_id_promocion; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_citas_id_promocion ON public.citas USING btree (id_promocion);
+
+
+--
+-- TOC entry 4875 (class 1259 OID 46671)
+-- Name: idx_codigos_recuperacion_usuario; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_codigos_recuperacion_usuario ON public.codigos_recuperacion USING btree (id_usuario, creado_en DESC);
+
+
+--
+-- TOC entry 4852 (class 1259 OID 46585)
+-- Name: idx_horarios_barbero_fecha; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_horarios_barbero_fecha ON public.horarios_barbero USING btree (id_barbero, fecha);
+
+
+--
+-- TOC entry 4868 (class 1259 OID 46592)
+-- Name: idx_movimientos_fecha; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_movimientos_fecha ON public.movimientos USING btree (fecha);
+
+
+--
+-- TOC entry 4869 (class 1259 OID 46593)
+-- Name: idx_movimientos_tipo; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_movimientos_tipo ON public.movimientos USING btree (tipo);
+
+
+--
+-- TOC entry 4870 (class 1259 OID 46594)
+-- Name: idx_movimientos_usuario; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_movimientos_usuario ON public.movimientos USING btree (id_usuario);
+
+
+--
+-- TOC entry 4847 (class 1259 OID 46584)
+-- Name: idx_promociones_fechas; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_promociones_fechas ON public.promociones USING btree (fecha_inicio, fecha_fin);
+
+
+--
+-- TOC entry 4863 (class 1259 OID 46591)
+-- Name: idx_resenas_barbero; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_resenas_barbero ON public.resenas USING btree (id_barbero);
+
+
+--
+-- TOC entry 4844 (class 1259 OID 46583)
+-- Name: idx_servicios_activo; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_servicios_activo ON public.servicios USING btree (activo);
+
+
+--
+-- TOC entry 4832 (class 1259 OID 46580)
+-- Name: idx_usuario_roles_rol; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_usuario_roles_rol ON public.usuario_roles USING btree (id_rol);
+
+
+--
+-- TOC entry 4833 (class 1259 OID 46579)
+-- Name: idx_usuario_roles_usuario; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_usuario_roles_usuario ON public.usuario_roles USING btree (id_usuario);
+
+
+--
+-- TOC entry 4823 (class 1259 OID 46578)
+-- Name: idx_usuarios_email; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_usuarios_email ON public.usuarios USING btree (email);
+
+
+--
+-- TOC entry 4880 (class 2606 OID 46646)
+-- Name: citas citas_id_promocion_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.citas
+    ADD CONSTRAINT citas_id_promocion_fkey FOREIGN KEY (id_promocion) REFERENCES public.promociones(id_promocion) ON DELETE RESTRICT;
+
+
+--
+-- TOC entry 4889 (class 2606 OID 46666)
+-- Name: codigos_recuperacion codigos_recuperacion_id_usuario_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.codigos_recuperacion
+    ADD CONSTRAINT codigos_recuperacion_id_usuario_fkey FOREIGN KEY (id_usuario) REFERENCES public.usuarios(id_usuario) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4878 (class 2606 OID 46448)
+-- Name: barberos fk_barbero_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.barberos
+    ADD CONSTRAINT fk_barbero_usuario FOREIGN KEY (id_usuario) REFERENCES public.usuarios(id_usuario) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4881 (class 2606 OID 46517)
+-- Name: citas fk_cita_barbero; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.citas
+    ADD CONSTRAINT fk_cita_barbero FOREIGN KEY (id_barbero) REFERENCES public.barberos(id_barbero) ON DELETE RESTRICT;
+
+
+--
+-- TOC entry 4882 (class 2606 OID 46512)
+-- Name: citas fk_cita_cliente; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.citas
+    ADD CONSTRAINT fk_cita_cliente FOREIGN KEY (id_cliente) REFERENCES public.usuarios(id_usuario) ON DELETE RESTRICT;
+
+
+--
+-- TOC entry 4883 (class 2606 OID 46522)
+-- Name: citas fk_cita_servicio; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.citas
+    ADD CONSTRAINT fk_cita_servicio FOREIGN KEY (id_servicio) REFERENCES public.servicios(id_servicio) ON DELETE RESTRICT;
+
+
+--
+-- TOC entry 4879 (class 2606 OID 46492)
+-- Name: horarios_barbero fk_horario_barbero; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.horarios_barbero
+    ADD CONSTRAINT fk_horario_barbero FOREIGN KEY (id_barbero) REFERENCES public.barberos(id_barbero) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4887 (class 2606 OID 46573)
+-- Name: movimientos fk_movimiento_cita; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.movimientos
+    ADD CONSTRAINT fk_movimiento_cita FOREIGN KEY (id_cita) REFERENCES public.citas(id_cita) ON DELETE SET NULL;
+
+
+--
+-- TOC entry 4888 (class 2606 OID 46568)
+-- Name: movimientos fk_movimiento_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.movimientos
+    ADD CONSTRAINT fk_movimiento_usuario FOREIGN KEY (id_usuario) REFERENCES public.usuarios(id_usuario) ON DELETE SET NULL;
+
+
+--
+-- TOC entry 4884 (class 2606 OID 46550)
+-- Name: resenas fk_resena_barbero; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.resenas
+    ADD CONSTRAINT fk_resena_barbero FOREIGN KEY (id_barbero) REFERENCES public.barberos(id_barbero) ON DELETE RESTRICT;
+
+
+--
+-- TOC entry 4885 (class 2606 OID 46540)
+-- Name: resenas fk_resena_cita; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.resenas
+    ADD CONSTRAINT fk_resena_cita FOREIGN KEY (id_cita) REFERENCES public.citas(id_cita) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4886 (class 2606 OID 46545)
+-- Name: resenas fk_resena_cliente; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.resenas
+    ADD CONSTRAINT fk_resena_cliente FOREIGN KEY (id_cliente) REFERENCES public.usuarios(id_usuario) ON DELETE RESTRICT;
+
+
+--
+-- TOC entry 4876 (class 2606 OID 46430)
+-- Name: usuario_roles fk_usuario_roles_rol; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuario_roles
+    ADD CONSTRAINT fk_usuario_roles_rol FOREIGN KEY (id_rol) REFERENCES public.roles(id_rol) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4877 (class 2606 OID 46425)
+-- Name: usuario_roles fk_usuario_roles_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuario_roles
+    ADD CONSTRAINT fk_usuario_roles_usuario FOREIGN KEY (id_usuario) REFERENCES public.usuarios(id_usuario) ON DELETE CASCADE;
+
+
+-- Completed on 2026-10-01 21:18:24
+
+--
+-- PostgreSQL database dump complete
+--
+

@@ -1,0 +1,117 @@
+.mchart {
+  background: linear-gradient(180deg, #23222b 0%, #1b1a21 100%);
+  border: 1px solid #33313d;
+  border-radius: var(--radius);
+  padding: 18px 20px 12px;
+  color: #e9e7ef;
+}
+
+.mchart-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.mchart-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f3f1f8;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f3f1f8;
+}
+
+.mchart-hint {
+  font-size: 12px;
+  color: #8f8ba0;
+}
+
+.mchart-body {
+  position: relative;
+  width: 100%;
+}
+
+.mchart-body svg {
+  display: block;
+  max-width: 100%;
+  touch-action: pan-y;
+}
+
+.mchart-grid {
+  stroke: #3a3844;
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.mchart-vline {
+  stroke: #ffffff;
+  stroke-opacity: 0.35;
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  transition: stroke-opacity 120ms ease;
+}
+
+.mchart-vline.is-active {
+  stroke-opacity: 0.9;
+}
+
+.mchart-axis {
+  fill: #a6a2b6;
+  font-size: 11px;
+}
+
+.mchart-dot {
+  fill: #ffffff;
+  stroke: #a855f7;
+  stroke-width: 3;
+}
+
+.mchart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8f8ba0;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.mchart-tooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  background: #ffffff;
+  color: #16151a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.mchart-tooltip strong {
+  font-size: 11.5px;
+  color: #6b6777;
+  text-transform: capitalize;
+}
+
+.mchart-tooltip-main {
+  font-size: 15px;
+  font-weight: 700;
+  color: #6d28d9;
+}
+
+.mchart-tooltip-row {
+  color: #55525c;
+}
+
+@media (max-width: 550px) {
+  .mchart {
+    padding: 14px 12px 8px;
+  }
+}
