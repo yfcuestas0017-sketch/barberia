@@ -62,9 +62,33 @@ const sendWithGmail = async (to, nombre, code) => {
   });
 };
 
+const sendWithAppsScript = async (to, nombre, code) => {
+  const { APPS_SCRIPT_URL, APPS_SCRIPT_TOKEN } = process.env;
+
+  const response = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      token: APPS_SCRIPT_TOKEN,
+      to,
+      subject,
+      text: buildText(nombre, code),
+      html: buildHtml(nombre, code)
+    })
+  });
+
+  const body = await response.text();
+
+  if (!response.ok || body.trim() !== "ok") {
+    throw new Error(`AppsScript ${response.status}: ${body.slice(0, 200)}`);
+  }
+};
+
 export const sendResetCode = async (to, nombre, code) => {
   const { BREVO_API_KEY, EMAIL_USER, EMAIL_PASS, NODE_ENV } = process.env;
 
+  if (process.env.APPS_SCRIPT_URL) return sendWithAppsScript(to, nombre, code);
+  
   if (BREVO_API_KEY) return sendWithBrevo(to, nombre, code);
 
   if (EMAIL_USER && EMAIL_PASS) return sendWithGmail(to, nombre, code);
