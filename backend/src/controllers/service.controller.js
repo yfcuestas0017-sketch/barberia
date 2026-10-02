@@ -256,7 +256,7 @@ export const deleteService = async (req, res) => {
   } catch (error) {
 
     // 23503 = violación de llave foránea (tiene citas asociadas)
-    if (error.code === "23503") {
+    if (error.code === "23503" || error.code === "23001") {
       return res.status(409).json({
         message:
           "No se puede eliminar: el servicio tiene citas registradas. Puedes desactivarlo en su lugar.",
