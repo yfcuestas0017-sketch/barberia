@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /barbero
+Disallow: /cliente
+Disallow: /recuperar
+
+Sitemap: https://barberia-mu-ruby.vercel.app/sitemap.xml
