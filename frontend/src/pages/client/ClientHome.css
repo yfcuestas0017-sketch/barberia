@@ -59,7 +59,7 @@
 
 .client-hero h1 {
   margin: 12px 0;
-
+  color: #ffffff;
   font-size: 44px;
   line-height: 1.1;
 }
@@ -517,4 +517,53 @@
   background: var(--ink);
   border-color: var(--ink);
   color: #fff;
+}
+
+.client-promotion-barbers {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-700);
+}
+
+
+/* Tarjeta de barbero clicable + calificación */
+.client-barber-card.clickable {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.client-barber-card.clickable:hover,
+.client-barber-card.clickable:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--gold, #c8972c);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  outline: none;
+}
+
+.client-barber-rating {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted, #8b8791);
+}
+
+.client-barber-rating .star {
+  color: var(--gold, #c8972c);
+  font-size: 14px;
+}
+
+.client-barber-rating strong {
+  color: var(--ink, #f1eff8);
+}
+
+.client-barber-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--gold-dark, #a67c1f);
 }

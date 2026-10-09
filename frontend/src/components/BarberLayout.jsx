@@ -5,7 +5,6 @@ import {
   IconMenu,
   IconChevronsLeft,
   IconSearch,
-  IconBell,
   IconHelp,
   IconLogout,
   IconDashboard,
@@ -14,15 +13,20 @@ import {
   IconStar,
   IconUserCircle,
   IconTrendUp,
+  IconTag,
 } from "./Icons";
 
+import NotificationBell from "./NotificationBell";
+
 import "./AppShell.css";
+import logo from "../assets/logo.png";
 
 const NAV_ITEMS = [
   { to: "/barbero", end: true, label: "Dashboard", icon: IconDashboard },
   { to: "/barbero/citas", label: "Mis citas", icon: IconCalendar },
   { to: "/barbero/ingresos", label: "Mis ingresos", icon: IconTrendUp },
   { to: "/barbero/horario", label: "Mi horario", icon: IconClock },
+  { to: "/barbero/promociones", label: "Mis promociones", icon: IconTag },
   { to: "/barbero/resenas", label: "Mis reseñas", icon: IconStar },
   { to: "/barbero/perfil", label: "Mi perfil", icon: IconUserCircle },
 ];
@@ -59,9 +63,9 @@ function BarberLayout() {
 
       <aside className={`shell-sidebar ${collapsed ? "collapsed" : ""} ${mobileOpen ? "open" : ""}`}>
         <div className="shell-brand">
-          <div className="shell-brand-mark">B</div>
+          <img src={logo} alt="Vitery Barber" className="shell-brand-mark" />
           <div className="shell-brand-text">
-            <strong>BITERY BARBER</strong>
+            <strong>VITERY BARBER</strong>
             <span>Panel Barbero</span>
           </div>
         </div>
@@ -101,10 +105,7 @@ function BarberLayout() {
             <button className="shell-icon-btn" title="Ayuda">
               <IconHelp size={18} />
             </button>
-            <button className="shell-icon-btn" title="Notificaciones">
-              <IconBell size={18} />
-              <span className="dot" />
-            </button>
+            <NotificationBell />
 
             <div className="shell-divider" />
 

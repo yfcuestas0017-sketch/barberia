@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import api from "../services/api";
 
 import "./Home.css";
+import logo from "../assets/logo.png";
 
 const GALLERY = [
   "https://loremflickr.com/460/460/barbershop/all?lock=11",
@@ -57,8 +58,8 @@ function Home() {
         <div className="container home-nav-inner">
 
           <a href="#top" className="home-logo" onClick={closeMenu}>
-            <span className="home-logo-mark">B</span>
-            BARBERÍA <em>BITERY BARBER</em>
+            <img src={logo} alt="Vitery Barber" className="home-logo-mark" />
+            <span>VITERY <em>BARBER</em></span>
           </a>
 
           <nav className={`home-links ${menuOpen ? "open" : ""}`}>
@@ -303,8 +304,8 @@ function Home() {
 
           <div className="footer-brand">
             <div className="home-logo">
-              <span className="home-logo-mark">B</span>
-              BITERY <em> BARBER</em>
+              <img src={logo} alt="Vitery Barber" className="home-logo-mark" />
+              <span>VITERY <em>BARBER</em></span>
             </div>
             <p>Tu estilo comienza aquí. Barbería con tradición, técnica moderna y atención de primera.</p>
           </div>
@@ -313,7 +314,7 @@ function Home() {
             <h4>Contacto</h4>
             <p>Calle 15 #23-45, Pasto, Nariño</p>
             <p>+57 300 123 4567</p>
-            <p>contacto@barberiaelite.com</p>
+            <p>contacto@viterybarber.com</p>
           </div>
 
           <div>
@@ -333,7 +334,7 @@ function Home() {
         </div>
 
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} Barbería BITERY BARBER. Todos los derechos reservados.</span>
+          <span>© {new Date().getFullYear()} Barbería VITERY BARBER. Todos los derechos reservados.</span>
         </div>
       </footer>
 

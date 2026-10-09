@@ -65,6 +65,11 @@ function ClientBooking() {
 
         if (promo) {
           setSelectedPromo(promo);
+
+          // Si solo la atiende un barbero, queda seleccionado
+          if (promo.barberos?.length === 1) {
+            setSelectedBarber(String(promo.barberos[0].id_barbero));
+          }
         }
       } else if (serviceId) {
         const service = servicesResponse.data.find(
@@ -114,6 +119,17 @@ function ClientBooking() {
     setSelectedPromo(promo);
     setSelectedService("");
     resetSchedule();
+
+    // Solo se puede reservar con los barberos que atienden la promoción
+    const allowed = (promo.barberos || []).map((barber) =>
+      String(barber.id_barbero)
+    );
+
+    if (allowed.length === 1) {
+      setSelectedBarber(allowed[0]);
+    } else if (!allowed.includes(String(selectedBarber))) {
+      setSelectedBarber("");
+    }
   };
 
   const clearPromo = () => {
@@ -259,6 +275,15 @@ function ClientBooking() {
     (barber) =>
       String(barber.id_barbero) === String(selectedBarber)
   );
+
+  // Con una promoción, solo los barberos que la atienden
+  const visibleBarbers = selectedPromo
+    ? barbers.filter((barber) =>
+        (selectedPromo.barberos || []).some(
+          (item) => item.id_barbero === barber.id_barbero
+        )
+      )
+    : barbers;
 
   // Lo que se está reservando: promoción o servicio normal
   const offer = selectedPromo
@@ -423,13 +448,21 @@ function ClientBooking() {
 
               <label>Selecciona un barbero</label>
 
-              {barbers.length === 0 ? (
+              {selectedPromo && (
+                <small className="booking-promo-note">
+                  {visibleBarbers.length === 1
+                    ? "Esta promoción solo la atiende el barbero indicado."
+                    : "Esta promoción solo la atienden los barberos que ves aquí."}
+                </small>
+              )}
+
+              {visibleBarbers.length === 0 ? (
                 <div className="booking-empty">
                   No hay barberos disponibles por el momento.
                 </div>
               ) : (
                 <div className="booking-barbers">
-                  {barbers.map((barber) => {
+                  {visibleBarbers.map((barber) => {
                     const active =
                       String(barber.id_barbero) === String(selectedBarber);
 

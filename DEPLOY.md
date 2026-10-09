@@ -39,8 +39,13 @@ Render gratis **bloquea el SMTP** (Gmail), por eso en producción se usa la API 
    y confírmalo con el enlace que te llega. Ese correo es tu `EMAIL_FROM`.
 3. **SMTP & API → API Keys → Generate a new API key**. Es tu `BREVO_API_KEY`.
 
+> **Importante:** en Brevo entra a *Security → Authorised IPs* y **desactiva el bloqueo por IP**; si no, Brevo rechaza las peticiones desde Render (IPs cambiantes) y verás «No pudimos enviar el correo».
+
 > Si el remitente es un @gmail.com, algunos correos pueden caer en spam (Gmail restringe que otros
 > servicios envíen "como Gmail"). Lo ideal a futuro es un dominio propio verificado en Brevo.
+
+### Migraciones pendientes en Neon
+Ejecuta en el SQL Editor de Neon, en orden, los archivos de `backend/database/` (001 a 006). La **006** crea `push_suscripciones`; sin ella las notificaciones no funcionan.
 
 ## 4. Subir el código a GitHub
 
@@ -73,6 +78,7 @@ El `.gitignore` ya excluye tus `.env` (no se suben las claves).
    | `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | los del paso 2 |
    | `BREVO_API_KEY` | el del paso 3 |
    | `EMAIL_FROM` | el remitente verificado en Brevo |
+   | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | las de tu `.env` local (o genera nuevas con `npx web-push generate-vapid-keys`). **Sin esto no llegan notificaciones al celular** |
 
 4. Deploy. Prueba abrir `https://TU-API.onrender.com/api/health` → debe responder `{"ok":true,...}`.
 

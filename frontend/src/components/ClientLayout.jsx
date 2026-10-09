@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 import "./ClientLayout.css";
+import logo from "../assets/logo.png";
 
 function ClientLayout() {
   const { user, logout } = useAuth();
@@ -22,9 +23,9 @@ function ClientLayout() {
       <header className="client-header">
 
         <div className="client-logo">
-          <div className="client-logo-icon">B</div>
+          <img src={logo} alt="Vitery Barber" className="client-logo-icon" />
           <div>
-            <strong>BITERY BARBER</strong>
+            <strong>VITERY BARBER</strong>
             <span>Reserva tu estilo</span>
           </div>
         </div>

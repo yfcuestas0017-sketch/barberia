@@ -5,6 +5,7 @@ import api from "../services/api";
 
 import "./Auth.css";
 import "./ForgotPassword.css";
+import logo from "../assets/logo.png";
 
 const RESEND_SECONDS = 60;
 
@@ -146,8 +147,8 @@ const ForgotPassword = () => {
       <div className="auth-visual">
         <div className="auth-visual-overlay" />
         <Link to="/" className="auth-brand">
-          <span className="auth-brand-mark">B</span>
-          BARBERÍA <em>BITERY BARBER</em>
+          <img src={logo} alt="Vitery Barber" className="auth-brand-mark" />
+          <span>VITERY <em>BARBER</em></span>
         </Link>
 
         <div className="auth-visual-text">

@@ -17,7 +17,9 @@ export const getBarbers = async (req, res) => {
         u.apellido,
         u.email,
         u.telefono,
-        u.foto
+        u.foto,
+        COALESCE((SELECT ROUND(AVG(r.estrellas)::numeric, 1) FROM resenas r WHERE r.id_barbero = b.id_barbero), 0) AS promedio_estrellas,
+        (SELECT COUNT(*)::int FROM resenas r WHERE r.id_barbero = b.id_barbero) AS total_resenas
       FROM barberos b
       INNER JOIN usuarios u
         ON u.id_usuario = b.id_usuario
@@ -50,7 +52,9 @@ export const getBarberById = async (req, res) => {
         u.apellido,
         u.email,
         u.telefono,
-        u.foto
+        u.foto,
+        COALESCE((SELECT ROUND(AVG(r.estrellas)::numeric, 1) FROM resenas r WHERE r.id_barbero = b.id_barbero), 0) AS promedio_estrellas,
+        (SELECT COUNT(*)::int FROM resenas r WHERE r.id_barbero = b.id_barbero) AS total_resenas
       FROM barberos b
       INNER JOIN usuarios u
         ON u.id_usuario = b.id_usuario

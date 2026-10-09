@@ -464,7 +464,7 @@
     display: none;
   }
 
-  .shell-icon-btn:nth-child(1),
+  .shell-icon-btn[title="Buscar"],
   .shell-divider {
     display: none;
   }

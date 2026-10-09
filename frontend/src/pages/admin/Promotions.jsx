@@ -6,6 +6,7 @@ import "./Promotions.css";
 
 function Promotions() {
   const [promotions, setPromotions] = useState([]);
+  const [barbers, setBarbers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -19,12 +20,24 @@ function Promotions() {
     duracion_minutos: "30",
     foto: "",
     fecha_inicio: "",
-    fecha_fin: ""
+    fecha_fin: "",
+    barberos: []
   });
 
   useEffect(() => {
     loadPromotions();
+    loadBarbers();
   }, []);
+
+  const loadBarbers = async () => {
+    try {
+      const response = await api.get("/barbers");
+
+      setBarbers(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const loadPromotions = async () => {
     try {
@@ -53,9 +66,14 @@ function Promotions() {
       nombre: "",
       descripcion: "",
       precio: "",
+      duracion_minutos: "30",
       foto: "",
       fecha_inicio: "",
-      fecha_fin: ""
+      fecha_fin: "",
+      // Por defecto, todos los barberos activos
+      barberos: barbers
+        .filter((barber) => barber.activo)
+        .map((barber) => barber.id_barbero)
     });
 
     setShowModal(true);
@@ -75,7 +93,10 @@ function Promotions() {
         : "",
       fecha_fin: promotion.fecha_fin
         ? promotion.fecha_fin.slice(0, 10)
-        : ""
+        : "",
+      barberos: (promotion.barberos || []).map(
+        (barber) => barber.id_barbero
+      )
     });
 
     setShowModal(true);
@@ -95,8 +116,42 @@ function Promotions() {
     }));
   };
 
+  const toggleBarber = (idBarbero) => {
+    setForm((previous) => ({
+      ...previous,
+      barberos: previous.barberos.includes(idBarbero)
+        ? previous.barberos.filter((id) => id !== idBarbero)
+        : [...previous.barberos, idBarbero]
+    }));
+  };
+
+  const selectAllBarbers = () => {
+    setForm((previous) => ({
+      ...previous,
+      barberos: barbers
+        .filter(
+          (barber) =>
+            barber.activo ||
+            previous.barberos.includes(barber.id_barbero)
+        )
+        .map((barber) => barber.id_barbero)
+    }));
+  };
+
+  const clearBarbers = () => {
+    setForm((previous) => ({ ...previous, barberos: [] }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (form.barberos.length === 0) {
+      setError(
+        "Selecciona al menos un barbero que atienda esta promoción."
+      );
+
+      return;
+    }
 
     if (
       form.fecha_inicio &&
@@ -296,6 +351,12 @@ function Promotions() {
 
               <div className="promotion-content">
 
+                {promotion.creada_por_barbero && (
+                  <span className="promotion-owner">
+                    Creada por {promotion.creador_nombre || "un barbero"}
+                  </span>
+                )}
+
                 <h3>{promotion.nombre}</h3>
 
                 <p className="promotion-description">
@@ -328,6 +389,38 @@ function Promotions() {
                       )}
                     </strong>
                   </div>
+
+                </div>
+
+                <div className="promotion-barbers">
+
+                  <span>Barberos que la atienden</span>
+
+                  {(promotion.barberos || []).length === 0 ? (
+                    <p className="promotion-note">
+                      Ningún barbero asignado: no se muestra a los
+                      clientes.
+                    </p>
+                  ) : (
+                    <div className="promotion-barber-chips">
+                      {promotion.barberos.map((barber) => (
+                        <span
+                          key={barber.id_barbero}
+                          className={`barber-chip ${barber.activo ? "" : "inactive"}`}
+                          title={barber.activo ? "" : "Barbero inactivo"}
+                        >
+                          <span className="barber-chip-photo">
+                            {barber.foto ? (
+                              <img src={barber.foto} alt="" />
+                            ) : (
+                              barber.nombre?.charAt(0)?.toUpperCase()
+                            )}
+                          </span>
+                          {barber.nombre} {barber.apellido}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                 </div>
 
@@ -485,6 +578,63 @@ function Promotions() {
                     onChange={handleChange}
                     required
                   />
+
+                </div>
+
+                <div className="form-group full">
+
+                  <div className="barber-picker-head">
+                    <label>Barberos que atienden esta promoción</label>
+
+                    <div>
+                      <button type="button" onClick={selectAllBarbers}>
+                        Todos
+                      </button>
+
+                      <button type="button" onClick={clearBarbers}>
+                        Ninguno
+                      </button>
+                    </div>
+                  </div>
+
+                  {barbers.length === 0 ? (
+                    <p className="barber-picker-hint">
+                      No hay barberos registrados.
+                    </p>
+                  ) : (
+                    <div className="barber-picker">
+                      {barbers.map((barber) => {
+                        const checked = form.barberos.includes(
+                          barber.id_barbero
+                        );
+
+                        return (
+                          <label
+                            key={barber.id_barbero}
+                            className={`barber-option ${checked ? "selected" : ""}`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() =>
+                                toggleBarber(barber.id_barbero)
+                              }
+                            />
+
+                            <span>
+                              {barber.nombre} {barber.apellido}{" "}
+                              {!barber.activo && <small>(inactivo)</small>}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <p className="barber-picker-hint">
+                    Los clientes solo podrán reservar esta promoción con
+                    los barberos marcados.
+                  </p>
 
                 </div>
 

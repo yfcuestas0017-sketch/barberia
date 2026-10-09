@@ -1,0 +1,202 @@
+/* =====================================================
+   Ajustes para celular (se carga al final de todo)
+   ===================================================== */
+
+/* Nada debe empujar la pantalla hacia los lados */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+}
+
+/* -------- Tablas -> tarjetas en pantallas pequeñas -------- */
+@media (max-width: 760px) {
+  /* El contenedor de la tabla ya no necesita marco ni scroll lateral */
+  *:has(> table.rt-cards) {
+    overflow: visible !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+
+  table.rt-cards,
+  table.rt-cards tbody,
+  table.rt-cards tfoot {
+    display: block;
+    width: 100% !important;
+    min-width: 0 !important;
+    border: 0 !important;
+  }
+
+  table.rt-cards thead {
+    display: none;
+  }
+
+  table.rt-cards tr {
+    display: block;
+    margin: 0 0 12px;
+    padding: 6px 14px;
+    background: #fff;
+    border: 1px solid var(--border, #e6e3de);
+    border-radius: 12px;
+  }
+
+  table.rt-cards td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    width: auto !important;
+    min-width: 0;
+    padding: 9px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px dashed var(--border, #e6e3de) !important;
+    text-align: right !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+
+  table.rt-cards td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  table.rt-cards td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    max-width: 42%;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted, #8b8791);
+  }
+
+  table.rt-cards td:not([data-label])::before {
+    display: none;
+  }
+
+  table.rt-cards td[colspan] {
+    justify-content: center;
+    text-align: center !important;
+  }
+
+  /* Botones de acciones: que se acomoden en varias líneas */
+  table.rt-cards td > div,
+  table.rt-cards td .actions,
+  table.rt-cards td .table-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  /* Evita el zoom automático de iPhone al tocar un campo */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Selectores sueltos a todo el ancho */
+  select {
+    max-width: 100%;
+  }
+}
+
+/* -------- Campana de notificaciones en celular -------- */
+@media (max-width: 560px) {
+  .notif-panel {
+    position: fixed;
+    top: 70px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+  }
+
+  .shell-icon-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
+
+/* -------- Filtros de "Mis citas" en una fila deslizable -------- */
+@media (max-width: 650px) {
+  .client-appointments .appointment-filters {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 4px 2px;
+    background: transparent !important;
+    border: 0 !important;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .client-appointments .appointment-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .client-appointments .appointment-filter {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* Filtros del barbero: una columna a todo el ancho */
+  .barber-appointments .appointment-filters {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    overflow: visible;
+  }
+
+  .barber-appointments .appointment-filter,
+  .barber-appointments .appointment-filter input,
+  .barber-appointments .appointment-filter select {
+    width: 100% !important;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+}
+
+/* -------- Ventanas emergentes (modales) -------- */
+@media (max-width: 560px) {
+  [class*="modal"],
+  [class*="popover"] {
+    max-width: calc(100vw - 24px);
+  }
+
+  .bpm-modal {
+    padding: 22px 16px 18px;
+    border-radius: 14px;
+  }
+
+  .bpm-head {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .bpm-rating {
+    justify-content: center;
+  }
+}
+
+/* -------- Pantallas muy angostas (320 px) -------- */
+@media (max-width: 360px) {
+  h1 {
+    font-size: clamp(22px, 7vw, 28px);
+  }
+
+  .container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}

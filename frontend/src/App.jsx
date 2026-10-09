@@ -28,6 +28,7 @@ import BarberDashboard from "./pages/barber/BarberDashboard";
 import BarberAppointments from "./pages/barber/BarberAppointments";
 import BarberSchedule from "./pages/barber/BarberSchedule";
 import BarberReviews from "./pages/barber/BarberReviews";
+import BarberPromotions from "./pages/barber/BarberPromotions";
 import BarberProfile from "./pages/barber/BarberProfile";
 import ClientLayout from "./components/ClientLayout";
 import ClientHome from "./pages/client/ClientHome";
@@ -35,6 +36,10 @@ import ClientBooking from "./pages/client/ClientBooking";
 import ClientAppointments from "./pages/client/ClientAppointments";
 import ClientProfile from "./pages/client/ClientProfile";
 import ClientReview from "./pages/client/ClientReview";
+import ResponsiveTables from "./components/ResponsiveTables";
+
+// Siempre al final para que sus reglas de celular tengan prioridad
+import "./responsive.css";
 
 
 function App() {
@@ -42,6 +47,8 @@ function App() {
     <BrowserRouter>
 
       <AuthProvider>
+
+        <ResponsiveTables />
 
         <Routes>
 
@@ -101,6 +108,7 @@ function App() {
             <Route path="citas" element={<BarberAppointments />} />
             <Route path="ingresos" element={<IncomesView role="BARBERO" />} />
             <Route path="horario" element={<BarberSchedule />} />
+            <Route path="promociones" element={<BarberPromotions />} />
             <Route path="resenas" element={<BarberReviews />} />
             <Route path="perfil" element={<BarberProfile />} />
           </Route>

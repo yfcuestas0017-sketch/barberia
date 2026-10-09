@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import api from "../../services/api";
+import BarberProfileModal from "../../components/BarberProfileModal/BarberProfileModal";
 
 import "./ClientHome.css";
 
@@ -11,6 +12,7 @@ function ClientHome() {
   const [services, setServices] = useState([]);
   const [promotions, setPromotions] = useState([]);
   const [barbers, setBarbers] = useState([]);
+  const [selectedBarber, setSelectedBarber] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -164,6 +166,15 @@ function ClientHome() {
                   <p>
                     {promotion.descripcion}
                   </p>
+
+                  {promotion.barberos?.length > 0 && (
+                    <p className="client-promotion-barbers">
+                      Con{" "}
+                      {promotion.barberos
+                        .map((barber) => `${barber.nombre} ${barber.apellido}`)
+                        .join(", ")}
+                    </p>
+                  )}
 
                   <div className="client-promotion-meta">
                     <strong>
@@ -320,8 +331,17 @@ function ClientHome() {
             {barbers.map((barber) => (
 
               <article
-                className="client-barber-card"
+                className="client-barber-card clickable"
                 key={barber.id_barbero}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedBarber(barber)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedBarber(barber);
+                  }
+                }}
               >
 
                 <div className="client-barber-photo">
@@ -356,6 +376,20 @@ function ClientHome() {
                   </p>
                 )}
 
+                <div className="client-barber-rating">
+                  <span className="star">★</span>
+                  {Number(barber.total_resenas) > 0 ? (
+                    <>
+                      <strong>{Number(barber.promedio_estrellas).toFixed(1)}</strong>
+                      <span>({barber.total_resenas})</span>
+                    </>
+                  ) : (
+                    <span>Sin reseñas aún</span>
+                  )}
+                </div>
+
+                <span className="client-barber-link">Ver perfil y reseñas</span>
+
               </article>
 
             ))}
@@ -383,6 +417,13 @@ function ClientHome() {
         </button>
 
       </section>
+
+      {selectedBarber && (
+        <BarberProfileModal
+          barber={selectedBarber}
+          onClose={() => setSelectedBarber(null)}
+        />
+      )}
 
     </div>
   );

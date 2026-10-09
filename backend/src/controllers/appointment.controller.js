@@ -1,11 +1,15 @@
 import pool from "../config/db.js";
+import { notifyNewAppointment } from "../services/notification.service.js";
 
 
 // =====================================================
 // Resuelve qué se está reservando: un SERVICIO normal o una PROMOCIÓN.
 // Devuelve { ok, ... } con precio y duración, o { ok:false, status, message }
 // =====================================================
-const resolveOffer = async (db, { id_servicio, id_promocion, fecha }) => {
+const resolveOffer = async (
+  db,
+  { id_servicio, id_promocion, fecha, id_barbero }
+) => {
 
   if (id_promocion) {
 
@@ -26,6 +30,26 @@ const resolveOffer = async (db, { id_servicio, id_promocion, fecha }) => {
         status: 400,
         message:
           "La promoción no está disponible para la fecha elegida"
+      };
+    }
+
+    // La promoción solo se puede reservar con los barberos que la atienden
+    const assigned = await db.query(
+      `
+      SELECT 1
+      FROM promocion_barberos
+      WHERE id_promocion = $1
+      AND id_barbero = $2
+      `,
+      [id_promocion, id_barbero]
+    );
+
+    if (assigned.rows.length === 0) {
+      return {
+        ok: false,
+        status: 400,
+        message:
+          "Esta promoción no está disponible con el barbero seleccionado"
       };
     }
 
@@ -102,7 +126,8 @@ export const getAvailableSlots = async (req, res) => {
     const offer = await resolveOffer(pool, {
       id_servicio,
       id_promocion,
-      fecha
+      fecha,
+      id_barbero
     });
 
     if (!offer.ok) {
@@ -217,11 +242,11 @@ export const getAvailableSlots = async (req, res) => {
         );
 
 
-      // Si el barbero definió minutos por corte, cada turno dura
-      // exactamente ese tiempo y la cita ocupa los turnos completos
-      // que necesite el servicio (ej.: servicio de 45 min con cortes
-      // de 30 min ocupa 2 turnos = 60 min). Sin minutos por corte
-      // se usa la duración del servicio, como antes.
+      // Si el barbero definió minutos por corte, cada cita ocupa
+      // exactamente UN turno de ese tamaño (ej.: cortes de 40 min ->
+      // 9:00-9:40, 9:40-10:20...), sin importar lo que dure el
+      // servicio. Sin minutos por corte se usa la duración del
+      // servicio, como antes.
       const cut =
         Number(schedule.duracion_corte) > 0
           ? Number(schedule.duracion_corte)
@@ -231,7 +256,7 @@ export const getAvailableSlots = async (req, res) => {
 
       const length =
         cut
-          ? Math.ceil(duration / cut) * cut
+          ? cut
           : duration;
 
       for (
@@ -342,7 +367,8 @@ export const createAppointment = async (req, res) => {
     const offer = await resolveOffer(client, {
       id_servicio,
       id_promocion,
-      fecha
+      fecha,
+      id_barbero
     });
 
     if (!offer.ok) {
@@ -435,9 +461,10 @@ export const createAppointment = async (req, res) => {
         ? Number(block.duracion_corte)
         : 0;
 
+    // Con minutos por corte, la cita ocupa exactamente un turno
     const length =
       cut
-        ? Math.ceil(offer.duracion_minutos / cut) * cut
+        ? cut
         : offer.duracion_minutos;
 
     // Con minutos por corte, la cita debe iniciar en un turno exacto
@@ -554,6 +581,13 @@ export const createAppointment = async (req, res) => {
 
 
     await client.query("COMMIT");
+
+
+    // Avisar al barbero (push + correo). Sin await: no retrasa la respuesta
+    // y si falla no afecta la cita, que ya quedó guardada.
+    notifyNewAppointment(
+      appointmentResult.rows[0].id_cita
+    );
 
 
     res.status(201).json({

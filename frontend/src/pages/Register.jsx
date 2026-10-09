@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 import "./Auth.css";
+import logo from "../assets/logo.png";
 
 function Register() {
   const navigate = useNavigate();
@@ -110,8 +111,8 @@ function Register() {
       <div className="auth-visual">
         <div className="auth-visual-overlay" />
         <Link to="/" className="auth-brand">
-          <span className="auth-brand-mark">B</span>
-          BARBERÍA <em>BITERY BARBER</em>
+          <img src={logo} alt="Vitery Barber" className="auth-brand-mark" />
+          <span>VITERY <em>BARBER</em></span>
         </Link>
 
         <div className="auth-visual-text">

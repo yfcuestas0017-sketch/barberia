@@ -1,5 +1,5 @@
 /* =========================================================
-   BARBERÍA ELITE — Design system
+   VITERY BARBER — Design system
    Marca cálida (negro grafito + dorado) unificada en todo
    el sitio público y los paneles internos.
    ========================================================= */
@@ -435,4 +435,33 @@ tbody tr {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   vertical-align: middle;
+}
+
+
+/* ---------- Logo de la marca (emblema circular) ---------- */
+.home-logo-mark,
+.auth-brand-mark,
+.shell-brand-mark,
+.client-logo-icon {
+  background: #000 !important;
+  border-radius: 50% !important;
+  object-fit: cover;
+  padding: 0 !important;
+  border: 1px solid rgba(200, 151, 44, 0.45);
+}
+
+.home-logo-mark,
+.auth-brand-mark {
+  width: 46px !important;
+  height: 46px !important;
+}
+
+.shell-brand-mark {
+  width: 44px !important;
+  height: 44px !important;
+}
+
+.client-logo-icon {
+  width: 42px !important;
+  height: 42px !important;
 }

@@ -19,6 +19,7 @@ import {
 } from "./Icons";
 
 import "./AppShell.css";
+import logo from "../assets/logo.png";
 
 const NAV_ITEMS = [
   { to: "/admin", end: true, label: "Dashboard", icon: IconDashboard },
@@ -63,9 +64,9 @@ function AdminLayout() {
 
       <aside className={`shell-sidebar ${collapsed ? "collapsed" : ""} ${mobileOpen ? "open" : ""}`}>
         <div className="shell-brand">
-          <div className="shell-brand-mark">B</div>
+          <img src={logo} alt="Vitery Barber" className="shell-brand-mark" />
           <div className="shell-brand-text">
-            <strong>BITERY BARBER</strong>
+            <strong>VITERY BARBER</strong>
             <span>Administración</span>
           </div>
         </div>
