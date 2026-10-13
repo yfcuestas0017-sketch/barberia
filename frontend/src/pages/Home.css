@@ -8,10 +8,21 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
   transition: box-shadow var(--dur) var(--ease-out);
+}
+
+/* El fondo translúcido + blur va en un pseudo-elemento: si backdrop-filter
+   estuviera en .home-nav, el menú móvil (position: fixed) se posicionaría
+   respecto al header en vez de la pantalla y quedaría con altura 0. */
+.home-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
 }
 
 .home-nav-inner {
@@ -659,22 +670,36 @@
   .hero-stats { transform: none; margin-top: 10px; }
 }
 
-@media (max-width: 860px) {
+/* ---- Menú hamburguesa (tablet y celular) ---- */
+@media (max-width: 1024px) {
   .home-links {
     position: fixed;
-    inset: 76px 0 0 0;
+    top: 76px;
+    right: 0;
+    bottom: 0;
+    left: 0;
     background: #fff;
     flex-direction: column;
     align-items: flex-start;
     padding: 30px 24px;
     gap: 20px;
     transform: translateX(100%);
-    transition: transform var(--dur-slow) var(--ease-out);
+    visibility: hidden;
+    transition: transform var(--dur-slow) var(--ease-out),
+                visibility 0s linear var(--dur-slow);
     overflow-y: auto;
+    z-index: 49;
   }
 
   .home-links.open {
     transform: translateX(0);
+    visibility: visible;
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+
+  .home-links a:not(.btn) {
+    font-size: 17px;
+    padding: 8px 0;
   }
 
   .home-links-actions {
@@ -691,7 +716,9 @@
   .home-burger {
     display: flex;
   }
+}
 
+@media (max-width: 860px) {
   .hero-content {
     padding-top: 110px;
   }

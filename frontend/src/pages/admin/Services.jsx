@@ -153,7 +153,12 @@ function Services() {
     if (!confirmed) return;
 
     try {
-      await api.delete(`/services/${id}`);
+      const res = await api.delete(`/services/${id}`);
+
+      // Si tenía historial, el servidor lo archiva y lo avisamos
+      if (res.data?.archivado) {
+        window.alert(res.data.message);
+      }
 
       await loadServices();
     } catch (error) {

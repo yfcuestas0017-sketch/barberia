@@ -23,7 +23,8 @@ export const getBarbers = async (req, res) => {
       FROM barberos b
       INNER JOIN usuarios u
         ON u.id_usuario = b.id_usuario
-      ${onlyActive ? "WHERE b.activo = TRUE" : ""}
+      WHERE b.eliminado = FALSE
+      ${onlyActive ? "AND b.activo = TRUE" : ""}
       ORDER BY b.id_barbero DESC
     `);
 
@@ -371,24 +372,22 @@ export const setBarberStatus = async (req, res) => {
 };
 
 
-// ADMIN: eliminar definitivamente (barbero + su usuario + su horario).
-// Si ya tiene citas o movimientos registrados, no se puede borrar.
+// ADMIN: eliminar.
+// - Sin citas, reseñas ni movimientos: se borra (barbero + usuario + horario).
+// - Con historial: se "archiva" (desaparece del sistema, el usuario ya no
+//   puede iniciar sesión y se libera su email), conservando el historial.
 export const deleteBarber = async (req, res) => {
   const client = await pool.connect();
 
   try {
     const { id } = req.params;
 
-    await client.query("BEGIN");
-
     const barberResult = await client.query(
-      "SELECT id_usuario FROM barberos WHERE id_barbero = $1",
+      "SELECT id_usuario FROM barberos WHERE id_barbero = $1 AND eliminado = FALSE",
       [id]
     );
 
     if (barberResult.rows.length === 0) {
-      await client.query("ROLLBACK");
-
       return res.status(404).json({
         message: "Barbero no encontrado"
       });
@@ -396,47 +395,88 @@ export const deleteBarber = async (req, res) => {
 
     const idUsuario = barberResult.rows[0].id_usuario;
 
-    await client.query(
-      "DELETE FROM horarios_barbero WHERE id_barbero = $1",
-      [id]
+    const archive = async () => {
+      await client.query("BEGIN");
+
+      await client.query(
+        "UPDATE barberos SET eliminado = TRUE, activo = FALSE WHERE id_barbero = $1",
+        [id]
+      );
+
+      // Desactiva el acceso y libera el email para poder reutilizarlo
+      await client.query(
+        `
+        UPDATE usuarios
+        SET activo = FALSE,
+            email = LEFT('eliminado-' || id_usuario || '-' || email, 150)
+        WHERE id_usuario = $1
+        AND email NOT LIKE 'eliminado-%'
+        `,
+        [idUsuario]
+      );
+
+      await client.query(
+        "UPDATE usuarios SET activo = FALSE WHERE id_usuario = $1",
+        [idUsuario]
+      );
+
+      await client.query("COMMIT");
+
+      return res.json({
+        message:
+          "El barbero tenía citas, reseñas o movimientos registrados, así que se archivó: ya no aparece en el sistema pero tu historial se conserva.",
+        archivado: true
+      });
+    };
+
+    const history = await client.query(
+      `
+      SELECT
+        EXISTS (SELECT 1 FROM citas WHERE id_barbero = $1) AS citas,
+        EXISTS (SELECT 1 FROM resenas WHERE id_barbero = $1) AS resenas,
+        EXISTS (SELECT 1 FROM movimientos WHERE id_usuario = $2) AS movimientos
+      `,
+      [id, idUsuario]
     );
 
-    await client.query(
-      "DELETE FROM barberos WHERE id_barbero = $1",
-      [id]
-    );
+    const h = history.rows[0];
 
-    await client.query(
-      "DELETE FROM usuario_roles WHERE id_usuario = $1",
-      [idUsuario]
-    );
+    if (h.citas || h.resenas || h.movimientos) {
+      return await archive();
+    }
 
-    await client.query(
-      "DELETE FROM usuarios WHERE id_usuario = $1",
-      [idUsuario]
-    );
+    try {
+      await client.query("BEGIN");
 
-    await client.query("COMMIT");
+      await client.query("DELETE FROM horarios_barbero WHERE id_barbero = $1", [id]);
+      await client.query("DELETE FROM barberos WHERE id_barbero = $1", [id]);
+      await client.query("DELETE FROM usuario_roles WHERE id_usuario = $1", [idUsuario]);
+      await client.query("DELETE FROM usuarios WHERE id_usuario = $1", [idUsuario]);
+
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+
+      // 23503 = llave foránea (algo más lo referencia): archivar
+      if (error.code === "23503") {
+        return await archive();
+      }
+
+      throw error;
+    }
 
     res.json({
       message: "Barbero eliminado correctamente"
     });
 
   } catch (error) {
-    await client.query("ROLLBACK");
-
-    // 23503 = violación de llave foránea (tiene citas o movimientos)
-    if (error.code === "23503") {
-      return res.status(409).json({
-        message:
-          "No se puede eliminar: el barbero tiene citas o movimientos registrados. Puedes desactivarlo en su lugar."
-      });
-    }
+    try { await client.query("ROLLBACK"); } catch { /* sin transacción abierta */ }
 
     console.error(error);
 
     res.status(500).json({
-      message: "Error al eliminar barbero"
+      message: "Error al eliminar barbero",
+      detail: error.message
     });
 
   } finally {

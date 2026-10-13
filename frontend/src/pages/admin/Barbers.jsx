@@ -157,7 +157,12 @@ function Barbers() {
     if (!confirmed) return;
 
     try {
-      await api.delete(`/barbers/${id}`);
+      const res = await api.delete(`/barbers/${id}`);
+
+      // Si tenía historial, el servidor lo archiva y lo avisamos
+      if (res.data?.archivado) {
+        window.alert(res.data.message);
+      }
 
       await loadBarbers();
     } catch (error) {

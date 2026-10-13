@@ -9,7 +9,8 @@ export const getServices = async (req, res) => {
     const result = await pool.query(`
       SELECT *
       FROM servicios
-      ${onlyActive ? "WHERE activo = TRUE" : ""}
+      WHERE eliminado = FALSE
+      ${onlyActive ? "AND activo = TRUE" : ""}
       ORDER BY id_servicio DESC
     `);
 
@@ -226,27 +227,61 @@ export const setServiceStatus = async (req, res) => {
 };
 
 
-// ADMIN: eliminar definitivamente
-// Sus promociones se eliminan con él. Si ya tiene citas, no se puede borrar.
+// ADMIN: eliminar.
+// - Sin citas: se borra de la base de datos.
+// - Con citas: se "archiva" (eliminado = TRUE, activo = FALSE). Desaparece
+//   del panel y de la web, pero el historial e ingresos se conservan.
 export const deleteService = async (req, res) => {
 
   try {
 
     const { id } = req.params;
 
-    const result = await pool.query(
-      `
-      DELETE FROM servicios
-      WHERE id_servicio = $1
-      RETURNING id_servicio
-      `,
+    const exists = await pool.query(
+      "SELECT 1 FROM servicios WHERE id_servicio = $1 AND eliminado = FALSE",
       [id]
     );
 
-    if (result.rows.length === 0) {
+    if (exists.rows.length === 0) {
       return res.status(404).json({
         message: "Servicio no encontrado",
       });
+    }
+
+    const archive = async () => {
+      await pool.query(
+        `
+        UPDATE servicios
+        SET eliminado = TRUE, activo = FALSE, updated_at = CURRENT_TIMESTAMP
+        WHERE id_servicio = $1
+        `,
+        [id]
+      );
+
+      return res.json({
+        message:
+          "El servicio tenía citas registradas, así que se archivó: ya no aparece en el sistema pero tu historial se conserva.",
+        archivado: true,
+      });
+    };
+
+    const hasHistory = await pool.query(
+      "SELECT 1 FROM citas WHERE id_servicio = $1 LIMIT 1",
+      [id]
+    );
+
+    if (hasHistory.rows.length > 0) {
+      return await archive();
+    }
+
+    try {
+      await pool.query("DELETE FROM servicios WHERE id_servicio = $1", [id]);
+    } catch (error) {
+      // 23503 = llave foránea (algo más lo referencia): archivar
+      if (error.code === "23503") {
+        return await archive();
+      }
+      throw error;
     }
 
     res.json({
@@ -255,18 +290,11 @@ export const deleteService = async (req, res) => {
 
   } catch (error) {
 
-    // 23503 = violación de llave foránea (tiene citas asociadas)
-    if (error.code === "23503" || error.code === "23001") {
-      return res.status(409).json({
-        message:
-          "No se puede eliminar: el servicio tiene citas registradas. Puedes desactivarlo en su lugar.",
-      });
-    }
-
     console.error(error);
 
     res.status(500).json({
       message: "Error al eliminar servicio",
+      detail: error.message,
     });
   }
 };

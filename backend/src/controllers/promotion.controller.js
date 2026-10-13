@@ -32,6 +32,7 @@ const promotionSelect = ({
       INNER JOIN barberos b ON b.id_barbero = pb.id_barbero
       INNER JOIN usuarios u ON u.id_usuario = b.id_usuario
       WHERE pb.id_promocion = p.id_promocion
+      AND b.eliminado = FALSE
       ${onlyActiveBarbers ? "AND b.activo = TRUE" : ""}
     ), '[]'::json) AS barberos
   FROM promociones p
@@ -147,6 +148,7 @@ export const getPromotions = async (req, res) => {
   try {
     const result = await pool.query(`
       ${promotionSelect()}
+      WHERE p.eliminado = FALSE
       ORDER BY p.fecha_inicio DESC, p.id_promocion DESC
     `);
 
@@ -183,6 +185,7 @@ export const getAvailablePromotions = async (req, res) => {
       `
       ${promotionSelect({ onlyActiveBarbers: true })}
       WHERE p.activo = TRUE
+        AND p.eliminado = FALSE
         AND CURRENT_DATE BETWEEN p.fecha_inicio AND p.fecha_fin
         AND EXISTS (
           SELECT 1
@@ -431,32 +434,76 @@ export const setPromotionStatus = async (req, res) => {
 };
 
 
-// ADMIN: eliminar. Si ya tiene citas, no se puede borrar (hay que desactivarla)
-export const deletePromotion = async (req, res) => {
-  try {
-    const { id } = req.params;
+// Elimina una promoción: la borra si no tiene citas; si tiene, la archiva
+// (eliminado = TRUE, activo = FALSE) para conservar el historial.
+// ownerBarberId (opcional) restringe a las promociones creadas por ese barbero.
+const removePromotion = async (id, ownerBarberId = null) => {
+  const params = [id];
+  let ownerSql = "";
 
-    const result = await pool.query(
-      "DELETE FROM promociones WHERE id_promocion = $1 RETURNING id_promocion",
+  if (ownerBarberId) {
+    params.push(ownerBarberId);
+    ownerSql = "AND id_barbero_creador = $2";
+  }
+
+  const exists = await pool.query(
+    `SELECT 1 FROM promociones WHERE id_promocion = $1 AND eliminado = FALSE ${ownerSql}`,
+    params
+  );
+
+  if (exists.rows.length === 0) return "not_found";
+
+  const archive = async () => {
+    await pool.query(
+      `
+      UPDATE promociones
+      SET eliminado = TRUE, activo = FALSE, updated_at = CURRENT_TIMESTAMP
+      WHERE id_promocion = $1
+      `,
       [id]
     );
+    return "archived";
+  };
 
-    if (result.rows.length === 0) {
+  const history = await pool.query(
+    "SELECT 1 FROM citas WHERE id_promocion = $1 LIMIT 1",
+    [id]
+  );
+
+  if (history.rows.length > 0) return archive();
+
+  try {
+    await pool.query("DELETE FROM promociones WHERE id_promocion = $1", [id]);
+    return "deleted";
+  } catch (error) {
+    if (error.code === "23503") return archive();
+    throw error;
+  }
+};
+
+const ARCHIVED_MESSAGE =
+  "La promoción tenía citas registradas, así que se archivó: ya no aparece en el sistema pero tu historial se conserva.";
+
+// ADMIN: eliminar
+export const deletePromotion = async (req, res) => {
+  try {
+    const outcome = await removePromotion(req.params.id);
+
+    if (outcome === "not_found") {
       return res.status(404).json({ message: "Promoción no encontrada" });
+    }
+
+    if (outcome === "archived") {
+      return res.json({ message: ARCHIVED_MESSAGE, archivado: true });
     }
 
     res.json({ message: "Promoción eliminada correctamente" });
   } catch (error) {
-    // 23503 = violación de llave foránea (la promoción tiene citas)
-    if (error.code === "23503") {
-      return res.status(409).json({
-        message:
-          "Esta promoción ya tiene citas registradas y no se puede eliminar. Desactívala para que deje de mostrarse."
-      });
-    }
-
     console.error(error);
-    res.status(500).json({ message: "Error al eliminar promoción" });
+    res.status(500).json({
+      message: "Error al eliminar promoción",
+      detail: error.message
+    });
   }
 };
 
@@ -479,12 +526,15 @@ export const getMyPromotions = async (req, res) => {
       ${promotionSelect({
         extraColumns: "(p.id_barbero_creador = $1) AS es_propia,"
       })}
-      WHERE p.id_barbero_creador = $1
-         OR EXISTS (
-           SELECT 1 FROM promocion_barberos x
-           WHERE x.id_promocion = p.id_promocion
-           AND x.id_barbero = $1
-         )
+      WHERE p.eliminado = FALSE
+        AND (
+          p.id_barbero_creador = $1
+          OR EXISTS (
+            SELECT 1 FROM promocion_barberos x
+            WHERE x.id_promocion = p.id_promocion
+            AND x.id_barbero = $1
+          )
+        )
       ORDER BY p.fecha_inicio DESC, p.id_promocion DESC
       `,
       [idBarbero]
@@ -681,7 +731,7 @@ export const setMyPromotionStatus = async (req, res) => {
 };
 
 
-// BARBERO: eliminar sus promociones (si ya tienen citas, solo desactivar)
+// BARBERO: eliminar sus promociones (si ya tienen citas, se archivan)
 export const deleteMyPromotion = async (req, res) => {
   try {
     const idBarbero = await getMyBarberId(req);
@@ -690,34 +740,24 @@ export const deleteMyPromotion = async (req, res) => {
       return res.status(404).json({ message: "Barbero no encontrado" });
     }
 
-    const { id } = req.params;
+    const outcome = await removePromotion(req.params.id, idBarbero);
 
-    const result = await pool.query(
-      `
-      DELETE FROM promociones
-      WHERE id_promocion = $1
-      AND id_barbero_creador = $2
-      RETURNING id_promocion
-      `,
-      [id, idBarbero]
-    );
-
-    if (result.rows.length === 0) {
+    if (outcome === "not_found") {
       return res.status(404).json({
         message: "Promoción no encontrada o no te pertenece"
       });
     }
 
-    res.json({ message: "Promoción eliminada correctamente" });
-  } catch (error) {
-    if (error.code === "23503") {
-      return res.status(409).json({
-        message:
-          "Esta promoción ya tiene citas registradas y no se puede eliminar. Desactívala para que deje de mostrarse."
-      });
+    if (outcome === "archived") {
+      return res.json({ message: ARCHIVED_MESSAGE, archivado: true });
     }
 
+    res.json({ message: "Promoción eliminada correctamente" });
+  } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error al eliminar la promoción" });
+    res.status(500).json({
+      message: "Error al eliminar la promoción",
+      detail: error.message
+    });
   }
 };

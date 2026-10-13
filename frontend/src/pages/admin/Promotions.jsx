@@ -229,7 +229,12 @@ function Promotions() {
     if (!confirmed) return;
 
     try {
-      await api.delete(`/promotions/${id}`);
+      const res = await api.delete(`/promotions/${id}`);
+
+      // Si tenía historial, el servidor lo archiva y lo avisamos
+      if (res.data?.archivado) {
+        window.alert(res.data.message);
+      }
 
       await loadPromotions();
     } catch (error) {
