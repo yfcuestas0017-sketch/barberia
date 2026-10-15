@@ -34,6 +34,12 @@ function ClientBooking() {
   const [success, setSuccess] = useState("");
 
   const hasOffer = Boolean(selectedPromo || selectedService);
+  const today = todayLocal();
+  const minDate =
+    selectedPromo && selectedPromo.fecha_inicio > today
+      ? selectedPromo.fecha_inicio
+      : today;
+  const maxDate = selectedPromo ? selectedPromo.fecha_fin : undefined;
 
   useEffect(() => {
     loadInitialData();
@@ -151,6 +157,18 @@ function ClientBooking() {
 
   const handleDateChange = async (event) => {
     const date = event.target.value;
+
+    if (date && (date < minDate || (maxDate && date > maxDate))) {
+      setSelectedDate("");
+      setSelectedSlot(null);
+      setSlots([]);
+      setError(
+        date < minDate
+          ? "Selecciona una fecha a partir de hoy."
+          : "La fecha debe estar dentro de la vigencia de la promoción."
+      );
+      return;
+    }
 
     setSelectedDate(date);
     setSelectedSlot(null);
@@ -280,7 +298,7 @@ function ClientBooking() {
   const visibleBarbers = selectedPromo
     ? barbers.filter((barber) =>
         (selectedPromo.barberos || []).some(
-          (item) => item.id_barbero === barber.id_barbero
+          (item) => String(item.id_barbero) === String(barber.id_barbero)
         )
       )
     : barbers;
@@ -294,14 +312,6 @@ function ClientBooking() {
         foto: selectedPromo.foto
       }
     : selectedServiceData || null;
-
-  // La fecha debe caer dentro de la vigencia de la promoción
-  const today = todayLocal();
-  const minDate =
-    selectedPromo && selectedPromo.fecha_inicio > today
-      ? selectedPromo.fecha_inicio
-      : today;
-  const maxDate = selectedPromo ? selectedPromo.fecha_fin : undefined;
 
   if (loading) {
     return (

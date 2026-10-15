@@ -129,6 +129,40 @@ export const getBarberReviews = async (req, res) => {
   }
 };
 
+export const getRecentReviews = async (_req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        r.id_resena,
+        r.estrellas,
+        r.comentario,
+        r.created_at,
+        cliente.nombre AS cliente_nombre,
+        cliente.apellido AS cliente_apellido,
+        barbero.nombre AS barbero_nombre,
+        barbero.apellido AS barbero_apellido
+      FROM resenas r
+      INNER JOIN usuarios cliente
+        ON cliente.id_usuario = r.id_cliente
+      INNER JOIN barberos b
+        ON b.id_barbero = r.id_barbero
+      INNER JOIN usuarios barbero
+        ON barbero.id_usuario = b.id_usuario
+      WHERE NULLIF(BTRIM(r.comentario), '') IS NOT NULL
+      ORDER BY r.created_at DESC, r.id_resena DESC
+      LIMIT 3
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error obteniendo reseñas recientes:", error);
+
+    res.status(500).json({
+      message: "Error al obtener reseñas recientes"
+    });
+  }
+};
+
 export const getMyReviews = async (req, res) => {
   try {
     const barberResult = await pool.query(

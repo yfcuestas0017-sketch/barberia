@@ -1,41 +1,25 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
-
-import "./Home.css";
+import localImage from "../../public/local.png";
 import logo from "../assets/logo.png";
+import "./Home.css";
+import corteImagen from "../1.png";
+import corteImagen1 from "../assets/2.png";
+import corteImagen2 from "../assets/3.png";
+import corteImagen3 from "../assets/4.png";
+import corteImagen4 from "../assets/5.png";
+import corteImagen5 from "../assets/6.png";
 
-const GALLERY = [
-  "https://loremflickr.com/460/460/barbershop/all?lock=11",
-  "https://loremflickr.com/460/460/haircut,men/all?lock=12",
-  "https://loremflickr.com/460/460/beard,style/all?lock=13",
-  "https://loremflickr.com/460/460/barber,tools/all?lock=14",
-  "https://loremflickr.com/460/460/fade,haircut/all?lock=15",
-  "https://loremflickr.com/460/460/pompadour/all?lock=16"
-];
-
-const TESTIMONIALS = [
-  {
-    name: "Miguel A.",
-    text: "Excelente atención, el corte quedó exactamente como lo pedí y el ambiente del local es muy agradable.",
-    img: "https://i.pravatar.cc/100?img=15"
-  },
-  {
-    name: "David R.",
-    text: "Reservar la cita en línea fue súper fácil y me atendieron puntual. Ya es mi barbería de confianza.",
-    img: "https://i.pravatar.cc/100?img=68"
-  },
-  {
-    name: "Santiago V.",
-    text: "El combo de corte y barba tiene una relación calidad-precio increíble. Totalmente recomendado.",
-    img: "https://i.pravatar.cc/100?img=51"
-  }
-];
+const GALLERY = [corteImagen, corteImagen1, corteImagen2, corteImagen3, corteImagen4, corteImagen5];
 
 function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [services, setServices] = useState([]);
   const [barbers, setBarbers] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
+  const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+  const [testimonialsError, setTestimonialsError] = useState(false);
 
   useEffect(() => {
     // Cargar servicios
@@ -47,6 +31,14 @@ function Home() {
     api.get("/barbers", { params: { solo_activos: true } })
       .then(res => setBarbers(res.data.filter(b => b.activo)))
       .catch(err => console.error("Error cargando barberos:", err));
+
+    api.get("/reviews/recent")
+      .then(res => setTestimonials(res.data))
+      .catch(err => {
+        console.error("Error cargando testimonios:", err);
+        setTestimonialsError(true);
+      })
+      .finally(() => setTestimonialsLoading(false));
   }, []);
 
   const closeMenu = () => setMenuOpen(false);
@@ -165,9 +157,7 @@ function Home() {
         <section id="nosotros" className="section section-alt">
           <div className="container why-grid">
 
-            <div className="why-image">
-              <img src="https://loremflickr.com/600/700/barbershop,interior/all?lock=20" alt="Interior de la barbería" loading="lazy" />
-            </div>
+            <img src={localImage} alt="Interior de la barbería" loading="lazy" />
 
             <div className="why-content">
               <span className="section-eyebrow">Por qué elegirnos</span>
@@ -180,7 +170,7 @@ function Home() {
 
               <div className="why-features">
                 <div className="why-item">
-                  <span className="why-icon">✂️</span>
+                  <span className="why-icon"></span>
                   <div>
                     <h4>Barberos certificados</h4>
                     <p>Profesionales con años de experiencia en cada técnica.</p>
@@ -188,7 +178,7 @@ function Home() {
                 </div>
 
                 <div className="why-item">
-                  <span className="why-icon">🕒</span>
+                  <span className="why-icon"></span>
                   <div>
                     <h4>Reservas en línea</h4>
                     <p>Agenda tu cita 24/7 desde el celular o el computador.</p>
@@ -196,7 +186,7 @@ function Home() {
                 </div>
 
                 <div className="why-item">
-                  <span className="why-icon">🧴</span>
+                  <span className="why-icon"></span>
                   <div>
                     <h4>Productos premium</h4>
                     <p>Solo utilizamos marcas de alta calidad para tu cuidado.</p>
@@ -204,7 +194,7 @@ function Home() {
                 </div>
 
                 <div className="why-item">
-                  <span className="why-icon">⭐</span>
+                  <span className="why-icon"></span>
                   <div>
                     <h4>Atención 5 estrellas</h4>
                     <p>Miles de clientes satisfechos avalan nuestro servicio.</p>
@@ -225,12 +215,16 @@ function Home() {
               <p>Una muestra de los estilos y cortes que hacemos día a día.</p>
             </div>
 
-            <div className="gallery-grid">
-              {GALLERY.map((src, i) => (
-                <div className="gallery-item" key={i}>
-                  <img src={src} alt={`Trabajo de barbería ${i + 1}`} loading="lazy" />
-                </div>
-              ))}
+             <div className="gallery-grid">
+                {GALLERY.map((src, i) => (
+                  <div className="gallery-item" key={i}>
+                    <img
+                      src={src}
+                      alt={`Trabajo de barbería ${i + 1}`}
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
             </div>
           </div>
         </section>
@@ -270,17 +264,54 @@ function Home() {
               <h2>Lo que dicen nuestros clientes</h2>
             </div>
 
-            <div className="testimonial-grid">
-              {TESTIMONIALS.map((t) => (
-                <div className="testimonial-card" key={t.name}>
-                  <p>“{t.text}”</p>
-                  <div className="testimonial-author">
-                    <img src={t.img} alt={t.name} loading="lazy" />
-                    <strong>{t.name}</strong>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {testimonialsLoading ? (
+              <p className="testimonial-message">Cargando reseñas...</p>
+            ) : testimonialsError ? (
+              <p className="testimonial-message">No se pudieron cargar las reseñas.</p>
+            ) : testimonials.length === 0 ? (
+              <p className="testimonial-message">Aún no hay comentarios de clientes.</p>
+            ) : (
+              <div className="testimonial-grid">
+                {testimonials.map((testimonial) => {
+                  const customerName = [
+                    testimonial.cliente_nombre,
+                    testimonial.cliente_apellido
+                  ].filter(Boolean).join(" ");
+                  const barberName = [
+                    testimonial.barbero_nombre,
+                    testimonial.barbero_apellido
+                  ].filter(Boolean).join(" ");
+                  const initials = customerName
+                    .split(/\s+/)
+                    .map((part) => part.charAt(0))
+                    .join("")
+                    .slice(0, 2);
+                  const rating = Number(testimonial.estrellas);
+
+                  return (
+                    <article className="testimonial-card" key={testimonial.id_resena}>
+                      <div
+                        className="testimonial-rating"
+                        aria-label={`Calificación: ${rating} de 5 estrellas`}
+                      >
+                        {"★".repeat(rating)}
+                        <span>{"☆".repeat(5 - rating)}</span>
+                      </div>
+                      <p>“{testimonial.comentario}”</p>
+                      <div className="testimonial-author">
+                        <div className="testimonial-avatar" aria-hidden="true">
+                          {initials}
+                        </div>
+                        <div>
+                          <strong>{customerName || "Cliente"}</strong>
+                          <span>Reseña para {barberName || "un barbero"}</span>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
@@ -312,16 +343,16 @@ function Home() {
 
           <div>
             <h4>Contacto</h4>
-            <p>Calle 15 #23-45, Pasto, Nariño</p>
-            <p>+57 300 123 4567</p>
-            <p>contacto@viterybarber.com</p>
+            <p>CRA 21A #14-105, Pasto, Nariño</p>
+            <p>+57 3154763844</p>
+            <p>manuel.viteri1@icloud.com</p>
           </div>
 
           <div>
             <h4>Horario</h4>
             <p>Lunes a viernes: 9:00 am – 8:00 pm</p>
-            <p>Sábados: 9:00 am – 6:00 pm</p>
-            <p>Domingos: cerrado</p>
+            <p>Sábados: 9:00 am – 8:00 pm</p>
+            <p>Domingos: horario libre</p>
           </div>
 
           <div>
@@ -343,4 +374,3 @@ function Home() {
 }
 
 export default Home;
-

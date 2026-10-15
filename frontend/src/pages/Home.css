@@ -541,21 +541,48 @@
   margin-bottom: 20px;
 }
 
+.testimonial-rating {
+  color: var(--gold-ink);
+  font-size: 16px;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.testimonial-rating span {
+  color: var(--border);
+}
+
 .testimonial-author {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.testimonial-author img {
+.testimonial-avatar {
+  display: grid;
+  place-items: center;
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  object-fit: cover;
+  background: var(--gold-ink);
+  color: var(--surface);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .testimonial-author strong {
+  display: block;
   font-size: 13.5px;
+}
+
+.testimonial-author span,
+.testimonial-message {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.testimonial-message {
+  text-align: center;
 }
 
 /* CTA */

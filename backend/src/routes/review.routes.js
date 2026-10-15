@@ -3,6 +3,7 @@ import express from "express";
 import {
   createReview,
   getBarberReviews,
+  getRecentReviews,
   getMyReviews,
   getAllReviews
 } from "../controllers/review.controller.js";
@@ -21,6 +22,11 @@ router.post(
 );
 
 // Reseñas públicas de un barbero
+router.get(
+  "/recent",
+  getRecentReviews
+);
+
 router.get(
   "/barber/:id",
   getBarberReviews

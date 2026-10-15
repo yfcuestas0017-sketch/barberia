@@ -193,6 +193,7 @@ export const getAvailablePromotions = async (req, res) => {
           INNER JOIN barberos b ON b.id_barbero = pb.id_barbero
           WHERE pb.id_promocion = p.id_promocion
           AND b.activo = TRUE
+          AND b.eliminado = FALSE
         )
         ${barberFilter}
       ORDER BY p.fecha_fin ASC, p.id_promocion DESC

@@ -7,6 +7,9 @@ import "./Promotions.css";
 function Promotions() {
   const [promotions, setPromotions] = useState([]);
   const [barbers, setBarbers] = useState([]);
+  const [barbersLoading, setBarbersLoading] = useState(true);
+  const [barbersError, setBarbersError] = useState("");
+  const [barberSearch, setBarberSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -31,11 +34,19 @@ function Promotions() {
 
   const loadBarbers = async () => {
     try {
+      setBarbersLoading(true);
       const response = await api.get("/barbers");
 
       setBarbers(response.data);
+      setBarbersError("");
     } catch (error) {
       console.error(error);
+      setBarbersError(
+        error.response?.data?.message ||
+        "No se pudieron cargar los barberos."
+      );
+    } finally {
+      setBarbersLoading(false);
     }
   };
 
@@ -70,12 +81,10 @@ function Promotions() {
       foto: "",
       fecha_inicio: "",
       fecha_fin: "",
-      // Por defecto, todos los barberos activos
-      barberos: barbers
-        .filter((barber) => barber.activo)
-        .map((barber) => barber.id_barbero)
+      barberos: []
     });
 
+    setBarberSearch("");
     setShowModal(true);
   };
 
@@ -94,11 +103,12 @@ function Promotions() {
       fecha_fin: promotion.fecha_fin
         ? promotion.fecha_fin.slice(0, 10)
         : "",
-      barberos: (promotion.barberos || []).map(
-        (barber) => barber.id_barbero
-      )
+      barberos: (promotion.barberos || [])
+        .filter((barber) => barber.activo)
+        .map((barber) => Number(barber.id_barbero))
     });
 
+    setBarberSearch("");
     setShowModal(true);
   };
 
@@ -119,28 +129,33 @@ function Promotions() {
   const toggleBarber = (idBarbero) => {
     setForm((previous) => ({
       ...previous,
-      barberos: previous.barberos.includes(idBarbero)
-        ? previous.barberos.filter((id) => id !== idBarbero)
-        : [...previous.barberos, idBarbero]
+      barberos: previous.barberos.some((id) => String(id) === String(idBarbero))
+        ? previous.barberos.filter((id) => String(id) !== String(idBarbero))
+        : [...previous.barberos, Number(idBarbero)]
     }));
   };
 
   const selectAllBarbers = () => {
     setForm((previous) => ({
       ...previous,
-      barberos: barbers
-        .filter(
-          (barber) =>
-            barber.activo ||
-            previous.barberos.includes(barber.id_barbero)
-        )
-        .map((barber) => barber.id_barbero)
+      barberos: availableBarbers.map((barber) => Number(barber.id_barbero))
     }));
   };
 
   const clearBarbers = () => {
     setForm((previous) => ({ ...previous, barberos: [] }));
   };
+
+  const availableBarbers = barbers.filter((barber) => barber.activo);
+  const normalizedSearch = barberSearch.trim().toLocaleLowerCase("es");
+  const filteredBarbers = availableBarbers.filter((barber) =>
+    `${barber.nombre} ${barber.apellido} ${barber.especialidad || ""}`
+      .toLocaleLowerCase("es")
+      .includes(normalizedSearch)
+  );
+  const selectedBarberCount = form.barberos.filter((id) =>
+    availableBarbers.some((barber) => String(barber.id_barbero) === String(id))
+  ).length;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -589,57 +604,91 @@ function Promotions() {
                 <div className="form-group full">
 
                   <div className="barber-picker-head">
-                    <label>Barberos que atienden esta promoción</label>
+                    <div className="barber-picker-title">
+                      <label>Barberos de la promoción</label>
+                      <p>Elige quiénes podrán atender las reservas de esta oferta.</p>
+                    </div>
 
-                    <div>
-                      <button type="button" onClick={selectAllBarbers}>
-                        Todos
+                    <span className="barber-picker-count">
+                      {selectedBarberCount} de {availableBarbers.length} seleccionados
+                    </span>
+                  </div>
+
+                  <div className="barber-picker-toolbar">
+                    <label className="barber-picker-search">
+                      <span aria-hidden="true">⌕</span>
+                      <input
+                        type="search"
+                        value={barberSearch}
+                        onChange={(event) => setBarberSearch(event.target.value)}
+                        placeholder="Buscar barbero..."
+                        aria-label="Buscar barbero"
+                      />
+                    </label>
+
+                    <div className="barber-picker-actions">
+                      <button
+                        type="button"
+                        onClick={selectAllBarbers}
+                        disabled={availableBarbers.length === 0}
+                      >
+                        Seleccionar todos
                       </button>
-
-                      <button type="button" onClick={clearBarbers}>
-                        Ninguno
+                      <button
+                        type="button"
+                        onClick={clearBarbers}
+                        disabled={selectedBarberCount === 0}
+                      >
+                        Limpiar
                       </button>
                     </div>
                   </div>
 
-                  {barbers.length === 0 ? (
-                    <p className="barber-picker-hint">
-                      No hay barberos registrados.
+                  {barbersLoading ? (
+                    <p className="barber-picker-state">Cargando barberos...</p>
+                  ) : barbersError ? (
+                    <p className="barber-picker-state error">{barbersError}</p>
+                  ) : availableBarbers.length === 0 ? (
+                    <p className="barber-picker-state">
+                      No hay barberos activos disponibles para esta promoción.
                     </p>
                   ) : (
                     <div className="barber-picker">
-                      {barbers.map((barber) => {
-                        const checked = form.barberos.includes(
-                          barber.id_barbero
+                      {filteredBarbers.map((barber) => {
+                        const checked = form.barberos.some(
+                          (id) => String(id) === String(barber.id_barbero)
                         );
 
                         return (
-                          <label
+                          <button
+                            type="button"
                             key={barber.id_barbero}
-                            className={`barber-option ${checked ? "selected" : ""}`}
+                            className={`barber-option-card ${checked ? "selected" : ""}`}
+                            aria-pressed={checked}
+                            onClick={() => toggleBarber(barber.id_barbero)}
                           >
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() =>
-                                toggleBarber(barber.id_barbero)
-                              }
-                            />
-
-                            <span>
-                              {barber.nombre} {barber.apellido}{" "}
-                              {!barber.activo && <small>(inactivo)</small>}
+                            <span className="barber-option-name">
+                              {barber.nombre} {barber.apellido}
                             </span>
-                          </label>
+                            <span className="barber-option-check" aria-hidden="true">
+                              {checked ? "Seleccionado" : "Elegir"}
+                            </span>
+                          </button>
                         );
                       })}
+                      {filteredBarbers.length === 0 && (
+                        <p className="barber-picker-state">
+                          No hay coincidencias para “{barberSearch}”.
+                        </p>
+                      )}
                     </div>
                   )}
 
-                  <p className="barber-picker-hint">
-                    Los clientes solo podrán reservar esta promoción con
-                    los barberos marcados.
-                  </p>
+                  {!barbersLoading && !barbersError && availableBarbers.length > 0 && (
+                    <p className="barber-picker-hint">
+                      Solo los barberos seleccionados aparecerán como opción al reservar esta promoción.
+                    </p>
+                  )}
 
                 </div>
 
