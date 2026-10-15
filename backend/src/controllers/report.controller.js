@@ -270,11 +270,20 @@ export const getAdminReport = async (req, res) => {
       [fechaInicio, fechaFin]
     );
 
+    const clientsCountResult = await pool.query(`
+      SELECT COUNT(DISTINCT ur.id_usuario)::int AS total
+      FROM usuario_roles ur
+      INNER JOIN roles r ON r.id_rol = ur.id_rol
+      WHERE r.nombre = 'CLIENTE'
+    `);
+
     res.json({
       periodo: {
         fecha_inicio: fechaInicio,
         fecha_fin: fechaFin
       },
+
+      clientes_registrados: clientsCountResult.rows[0].total,
 
       resumen: {
         ingresos,

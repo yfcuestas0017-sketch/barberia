@@ -90,6 +90,7 @@ function AdminDashboard() {
     { label: "Egresos", value: formatMoney(resumen.egresos), icon: IconTrendDown, tone: "danger" },
     { label: "Utilidad", value: formatMoney(resumen.utilidad), icon: IconWallet, tone: "gold" },
     { label: "Total citas", value: citas.total || 0, icon: IconCalendar, tone: "info" },
+    { label: "Clientes registrados", value: report?.clientes_registrados || 0, icon: IconUsers, tone: "warning" },
   ];
 
   const appointmentCards = [

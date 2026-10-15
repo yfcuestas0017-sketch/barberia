@@ -23,6 +23,7 @@ import logo from "../assets/logo.png";
 
 const NAV_ITEMS = [
   { to: "/admin", end: true, label: "Dashboard", icon: IconDashboard },
+  { to: "/admin/clientes", label: "Clientes registrados", icon: IconUsers },
   { to: "/admin/barberos", label: "Barberos", icon: IconUsers },
   { to: "/admin/servicios", label: "Servicios", icon: IconScissors },
   { to: "/admin/promociones", label: "Promociones", icon: IconTag },

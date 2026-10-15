@@ -7,27 +7,38 @@
 /* LEFT VISUAL PANEL */
 .auth-visual {
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 40px 48px;
   color: #fff;
-  background-image: url("https://loremflickr.com/1000/1400/barber,barbershop/all?lock=77");
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
+  background: #343434;
+}
+
+.auth-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("../1.png") center / cover no-repeat;
+  filter: grayscale(100%);
+  transform: scale(1.02);
 }
 
 .auth-visual-overlay {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background:
-    radial-gradient(ellipse at 15% 0%, rgba(200, 151, 44, 0.28), transparent 55%),
-    linear-gradient(180deg, rgba(14, 13, 16, 0.6) 0%, rgba(14, 13, 16, 0.72) 55%, rgba(14, 13, 16, 0.94) 100%);
+    radial-gradient(ellipse at 15% 0%, rgba(200, 151, 44, 0.16), transparent 55%),
+    linear-gradient(180deg, rgba(42, 42, 42, 0.48) 0%, rgba(30, 30, 30, 0.72) 55%, rgba(18, 18, 18, 0.94) 100%);
 }
 
 .auth-brand {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -62,7 +73,7 @@
 
 .auth-visual-text {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: 380px;
 }
 

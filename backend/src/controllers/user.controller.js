@@ -1,5 +1,33 @@
 import pool from "../config/db.js";
 
+export const getRegisteredClients = async (_req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT DISTINCT
+        u.id_usuario,
+        u.nombre,
+        u.apellido,
+        u.email,
+        u.telefono,
+        u.foto,
+        u.activo,
+        u.created_at
+      FROM usuarios u
+      INNER JOIN usuario_roles ur ON ur.id_usuario = u.id_usuario
+      INNER JOIN roles r ON r.id_rol = ur.id_rol
+      WHERE r.nombre = 'CLIENTE'
+      ORDER BY u.created_at DESC, u.id_usuario DESC
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error obteniendo clientes registrados:", error);
+    res.status(500).json({
+      message: "Error al obtener los clientes registrados"
+    });
+  }
+};
+
 export const getMyProfile = async (req, res) => {
   try {
     const result = await pool.query(
@@ -105,6 +133,12 @@ export const updatePassword = async (req, res) => {
   const { password_actual, password_nuevo } = req.body;
   if (!password_actual || !password_nuevo) {
     return res.status(400).json({ message: "Se requieren las contraseñas" });
+  }
+
+  if (password_nuevo.length < 6) {
+    return res.status(400).json({
+      message: "La nueva contraseña debe tener al menos 6 caracteres"
+    });
   }
 
   try {

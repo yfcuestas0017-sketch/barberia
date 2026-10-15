@@ -15,6 +15,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import AdminLayout from "./components/AdminLayout";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import RegisteredClients from "./pages/admin/RegisteredClients";
 import AdminPerfil from "./pages/admin/AdminPerfil";
 import Barbers from "./pages/admin/Barbers";
 import Services from "./pages/admin/Services";
@@ -82,6 +83,7 @@ function App() {
             }
           >
             <Route index element={<AdminDashboard />} />
+            <Route path="clientes" element={<RegisteredClients />} />
             <Route path="barberos" element={<Barbers />} />
             <Route path="servicios" element={<Services />} />
             <Route path="promociones" element={<Promotions />} />

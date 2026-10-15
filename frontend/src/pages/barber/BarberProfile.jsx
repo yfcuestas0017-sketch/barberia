@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import ImageUploader from "../../components/ImageUploader/ImageUploader";
+import ChangePassword from "../../components/ChangePassword/ChangePassword";
 
 import "./BarberProfile.css";
 
@@ -336,6 +337,8 @@ function BarberProfile() {
                 />
 
               </div>
+
+              <ChangePassword />
 
             </div>
 

@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import ImageUploader from "../../components/ImageUploader/ImageUploader";
+import ChangePassword from "../../components/ChangePassword/ChangePassword";
 
 import "./ClientProfile.css";
 
 function ClientProfile() {
+  const { updateUser } = useAuth();
   const [form, setForm] = useState({
     nombre: "",
     apellido: "",
@@ -93,6 +96,12 @@ function ClientProfile() {
         email: updatedUser.email || "",
         telefono: updatedUser.telefono || "",
         foto: updatedUser.foto || ""
+      });
+      updateUser({
+        nombre: updatedUser.nombre,
+        apellido: updatedUser.apellido,
+        telefono: updatedUser.telefono,
+        foto: updatedUser.foto
       });
 
       setSuccess(
@@ -278,21 +287,15 @@ function ClientProfile() {
 
             <div className="profile-field full">
 
-              <label>
-                Foto de perfil
-              </label>
-
-              <input
-                type="url"
-                name="foto"
+              <ImageUploader
+                label="Foto de perfil"
                 value={form.foto}
-                onChange={handleChange}
-                placeholder="https://..."
+                onChange={(url) => {
+                  setForm((previous) => ({ ...previous, foto: url }));
+                  setError("");
+                  setSuccess("");
+                }}
               />
-
-              <small>
-                Puedes utilizar la URL de una imagen.
-              </small>
 
             </div>
 
@@ -314,6 +317,8 @@ function ClientProfile() {
         </form>
 
       </div>
+
+      <ChangePassword />
 
     </div>
   );
